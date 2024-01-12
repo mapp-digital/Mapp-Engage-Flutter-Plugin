@@ -1,3 +1,6 @@
+## 0.0.9
+* Update ios part which now contains new native SDK 
+
 ## 0.0.8
 * Changes to pubspec list so the plugin now can work on flutter apps which are using swift for iOS part.
 
