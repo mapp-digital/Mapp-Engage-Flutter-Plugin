@@ -160,7 +160,8 @@ class _HomePageState extends State<HomePage> {
             "POST NOTIFICATION", "Permission result", "Permission was denied!");
       }
     } on PlatformException catch (e) {
-      _showMyDialog("POST NOTIFICATION", e.code, e.message?.toString() ?? "Unknown error");
+      _showMyDialog("POST NOTIFICATION", e.code,
+          e.message?.toString() ?? "Unknown error");
     }
   }
 
@@ -251,7 +252,7 @@ class _HomePageState extends State<HomePage> {
       });
     } else if (_screens[index] == "Is Push Enabled") {
       MappSdk.isPushEnabled().then((bool value) =>
-          {_showMyDialog("Show Device Information", "", value ? "YES" : "NO")});
+          {_showMyDialog("Push Enabled", "", value ? "YES" : "NO")});
     } else if (_screens[index] == "Opt in") {
       MappSdk.setPushEnabled(true);
     } else if (_screens[index] == "Opt out") {
