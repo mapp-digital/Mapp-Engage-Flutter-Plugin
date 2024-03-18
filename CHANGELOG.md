@@ -1,4 +1,4 @@
-## 1.0.0
+## 0.0.10
 
 - Updated native android libraries
 - Updated Java version to Java 17
