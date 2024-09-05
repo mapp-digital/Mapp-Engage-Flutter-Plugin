@@ -344,7 +344,7 @@ public class MappSdkPlugin implements FlutterPlugin, ActivityAware, MethodCallHa
 
     private void fetchInboxMessage(int templateId, @NonNull Result result) {
         try {
-            Appoxee.instance().fetchInboxMessage(activity, templateId);
+            Appoxee.instance().fetchInboxMessage(templateId);
             handleInAppInboxMessages(result);
         } catch (Exception e) {
             result.error(Method.FETCH_INBOX_MESSAGE, e.getMessage(), null);
@@ -353,7 +353,7 @@ public class MappSdkPlugin implements FlutterPlugin, ActivityAware, MethodCallHa
 
     private void fetchInboxMessages(@NonNull Result result) {
         try {
-            Appoxee.instance().fetchInboxMessages(activity);
+            Appoxee.instance().fetchInboxMessages();
             handleInAppInboxMessages(result);
         } catch (Exception e) {
             result.error(Method.FETCH_INBOX_MESSAGES, e.getMessage(), null);
