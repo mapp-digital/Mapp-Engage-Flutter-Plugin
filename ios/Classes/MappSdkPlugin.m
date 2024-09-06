@@ -36,6 +36,7 @@ static FlutterMethodChannel *channel;
     [[Appoxee shared] engageAndAutoIntegrateWithLaunchOptions:NULL andDelegate:(id)[PushMessageDelegate sharedObject] with:serv];
     INAPPSERVER inappServ = [self getInappServerKeyFor: serverNumber];
     [[AppoxeeInapp shared] engageWithDelegate:(id)[InAppMessageDelegate sharedObject] with:inappServ];
+    result([NSString stringWithFormat:@"%ld", (long)[Appoxee version]]);
   } else if ([@"postponeNotificationRequest" isEqualToString:call.method]){
     NSNumber *value = call.arguments[0];
     [[Appoxee shared] setPostponeNotificationRequest:[value boolValue]];
