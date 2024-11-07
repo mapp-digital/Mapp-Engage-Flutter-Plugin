@@ -10,6 +10,8 @@
   - Updated firebase-bom to version 33.5.1
   - Updated Gradle wrapper to version 8.7
   - Updated Android Gradle Plugin to version 8.5.2
+- iOS updates:
+  - update Mapp Engage library to 6.0.8
 
 ## 0.0.9
 
