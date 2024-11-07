@@ -1,11 +1,11 @@
 ## 0.0.10
 
-- Updated native android libraries
-- Updated Java version to Java 17
-- Updated targetSdk for Android to version 34
 - Updated Dart version (sdk: ">=3.5.0 <4.0.0")
 - Updated Flutter version (flutter: ">=3.24.0")
 - Android updates:
+  - Updated native android libraries
+  - Updated Java version to Java 17
+  - Updated targetSdk for Android to version 34
   - Updated Mapp Engage Android SDK to version 6.0.25
   - Updated firebase-bom to version 33.5.1
   - Updated Gradle wrapper to version 8.7
