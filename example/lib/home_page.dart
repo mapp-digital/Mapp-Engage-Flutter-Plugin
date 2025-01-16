@@ -54,6 +54,7 @@ class _HomePageState extends State<HomePage> {
     debugPrint("initMappSdk()");
     await MappSdk.engage(Config.sdkKey, Config.googleProjectId, Config.server,
         Config.appID, Config.tenantID);
+    await MappSdk.showNotificationsOnForeground(true);
     await initPlatformState();
     await requestPermissionPostNotifications();
   }

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -100,9 +101,13 @@ class MappSdk {
 
   static Future<String?> showNotificationsOnForeground(
       bool showNotification) async {
-    final String? version = await _channel.invokeMethod(
+        if (Platform.isIOS) {
+      final String? version = await _channel.invokeMethod(
         Method.SHOW_NOTIFICATION_ON_FOREGROUND, [showNotification]);
     return 'successfull $version postponeNotificationRequest method invoked';
+    } else {
+      return 'Required only for iOS.';
+    }
   }
 
   static Future<bool> isReady() async {
