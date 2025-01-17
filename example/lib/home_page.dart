@@ -43,12 +43,11 @@ class _HomePageState extends State<HomePage> {
   List<String> _screens = [];
 
   @override
-  Future<void> initState() async {
+  void initState() {
     debugPrint("initState()");
     super.initState();
 
     initMappSdk();
-    await MappSdk.showNotificationsOnForeground(true);
   }
 
   void initMappSdk() async {
@@ -57,6 +56,7 @@ class _HomePageState extends State<HomePage> {
         Config.appID, Config.tenantID);
     await initPlatformState();
     await requestPermissionPostNotifications();
+    await MappSdk.showNotificationsOnForeground(true);
   }
 
   void didReceiveDeepLinkWithIdentifierHandler(dynamic arguments) {
