@@ -1,3 +1,6 @@
+## 0.0.11
+- update method for enabling foreground notification at iOS
+
 ## 0.0.10
 - Updated Dart version (sdk: ">=3.5.0 <4.0.0")
 - Updated Flutter version (flutter: ">=3.24.0")

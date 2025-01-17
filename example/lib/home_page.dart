@@ -43,18 +43,18 @@ class _HomePageState extends State<HomePage> {
   List<String> _screens = [];
 
   @override
-  void initState() {
+  Future<void> initState() async {
     debugPrint("initState()");
     super.initState();
 
     initMappSdk();
+    await MappSdk.showNotificationsOnForeground(true);
   }
 
   void initMappSdk() async {
     debugPrint("initMappSdk()");
     await MappSdk.engage(Config.sdkKey, Config.googleProjectId, Config.server,
         Config.appID, Config.tenantID);
-    await MappSdk.showNotificationsOnForeground(true);
     await initPlatformState();
     await requestPermissionPostNotifications();
   }
