@@ -59,6 +59,11 @@ class _HomePageState extends State<HomePage> {
     await MappSdk.showNotificationsOnForeground(true);
   }
 
+  void handledRemoteNotification(dynamic arguments) {
+    print("handle remote notification!");
+    print(arguments);
+  }
+
   void didReceiveDeepLinkWithIdentifierHandler(dynamic arguments) {
     print("deep link received!");
     print(arguments);

@@ -203,7 +203,11 @@ class MappSdk {
 
   /// Only for Android - Request permission to post notifications, for Android 13 and higher
   static Future<bool> requestPermissionPostNotifications() async {
-    return await _channel
+    if (Platform.isIOS) {
+      return false;
+    } else {
+      return await _channel
         .invokeMethod(Method.PERSMISSION_REQUEST_POST_NOTIFICATION);
+    }
   }
 }
