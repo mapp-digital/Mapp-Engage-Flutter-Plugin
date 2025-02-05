@@ -69,8 +69,6 @@
 
 - (void)userNotificationCenter:(UNUserNotificationCenter *)center didReceiveNotificationResponse:(UNNotificationResponse *)response withCompletionHandler:(void (^)(void))completionHandler {
     [[Appoxee shared] userNotificationCenter:center didReceiveNotificationResponse:response withAppoxeeCompletionHandler:^{
-            // When the completion handler is called, this means that Appoxee completed it's execution.
-            // Call the completion handler.
             completionHandler();
         }];
 }
