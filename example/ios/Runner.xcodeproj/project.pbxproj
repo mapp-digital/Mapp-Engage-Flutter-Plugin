@@ -17,6 +17,7 @@
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
 		A340EFF02771C383001BCCD0 /* NotificationService.m in Sources */ = {isa = PBXBuildFile; fileRef = A340EFEF2771C383001BCCD0 /* NotificationService.m */; };
 		A340EFF42771C383001BCCD0 /* RunnerExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = A340EFEC2771C382001BCCD0 /* RunnerExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		A380AAEB2D47BA9F0059437B /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A380AAEA2D47BA9F0059437B /* UserNotifications.framework */; };
 		A3FDCE0D2747D1FC00FB14A7 /* AppoxeeConfig.plist in Resources */ = {isa = PBXBuildFile; fileRef = A3FDCE0C2747D1FC00FB14A7 /* AppoxeeConfig.plist */; };
 /* End PBXBuildFile section */
 
@@ -76,6 +77,7 @@
 		A340EFEF2771C383001BCCD0 /* NotificationService.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NotificationService.m; sourceTree = "<group>"; };
 		A340EFF12771C383001BCCD0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A340EFFA277204D9001BCCD0 /* RunnerExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RunnerExtension.entitlements; sourceTree = "<group>"; };
+		A380AAEA2D47BA9F0059437B /* UserNotifications.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UserNotifications.framework; path = System/Library/Frameworks/UserNotifications.framework; sourceTree = SDKROOT; };
 		A3FDCE0C2747D1FC00FB14A7 /* AppoxeeConfig.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = AppoxeeConfig.plist; sourceTree = SOURCE_ROOT; };
 		A3FDCE0E2747D2B400FB14A7 /* Runner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Runner.entitlements; sourceTree = "<group>"; };
 		B2527CD67145B2D98F4FFC91 /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
@@ -87,6 +89,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A380AAEB2D47BA9F0059437B /* UserNotifications.framework in Frameworks */,
 				740E2A9A905044678978F946 /* libPods-Runner.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -114,6 +117,7 @@
 		88ED9529C47C3568B92A22BC /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				A380AAEA2D47BA9F0059437B /* UserNotifications.framework */,
 				8879EAA54B4BF3BCBAF85924 /* libPods-Runner.a */,
 			);
 			name = Frameworks;

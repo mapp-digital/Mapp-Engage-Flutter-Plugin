@@ -5,7 +5,7 @@
 #import <UIKit/UIKit.h>
 #import "AppoxeeSDK.h"
 
-@interface PushMessageDelegate() <AppoxeeDelegate, UIApplicationDelegate>
+@interface PushMessageDelegate() <AppoxeeDelegate, UIApplicationDelegate, UNUserNotificationCenterDelegate>
 
 @property FlutterMethodChannel* channel;
 
@@ -59,6 +59,20 @@
         [[NSNotificationCenter defaultCenter] postNotificationName:
             @"didReceiveDeepLinkWithIdentifier" object:nil userInfo: @{@"action":actionIdentifier, @"url": deepLink, @"event_trigger": @"" }];
     }
+}
+
+- (void)userNotificationCenter:(UNUserNotificationCenter *)center willPresentNotification:(UNNotification *)notification withCompletionHandler:(void (^)(UNNotificationPresentationOptions))completionHandler {
+    [[NSNotificationCenter defaultCenter] postNotificationName:
+             @"handledRemoteNotification" object:nil userInfo:notification.request.content.userInfo];
+    if (completionHandler) completionHandler(UNNotificationPresentationOptionBadge | UNNotificationPresentationOptionSound | UNNotificationPresentationOptionList | UNNotificationPresentationOptionBanner);
+}
+
+- (void)userNotificationCenter:(UNUserNotificationCenter *)center didReceiveNotificationResponse:(UNNotificationResponse *)response withCompletionHandler:(void (^)(void))completionHandler {
+    [[Appoxee shared] userNotificationCenter:center didReceiveNotificationResponse:response withAppoxeeCompletionHandler:^{
+            // When the completion handler is called, this means that Appoxee completed it's execution.
+            // Call the completion handler.
+            completionHandler();
+        }];
 }
 
 - (void)appoxee:(Appoxee *)appoxee handledRichContent:(APXRichMessage *)richMessage didLaunchApp:(BOOL)didLaunch {
