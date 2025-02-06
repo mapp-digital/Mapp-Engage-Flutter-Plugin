@@ -65,11 +65,8 @@
     [[NSNotificationCenter defaultCenter] postNotificationName:
              @"handledRemoteNotification" object:nil userInfo:notification.request.content.userInfo];
     if ([[Appoxee shared] showNotificationsOnForeground]) {
-     
         if (completionHandler) completionHandler(UNNotificationPresentationOptionBadge | UNNotificationPresentationOptionSound | UNNotificationPresentationOptionAlert);
-        
     } else {
-        
         if (completionHandler) completionHandler(UNNotificationPresentationOptionNone);
     }
 }
