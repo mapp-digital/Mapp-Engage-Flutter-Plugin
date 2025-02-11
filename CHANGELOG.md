@@ -1,5 +1,6 @@
 ## 0.0.11
 - update method for enabling foreground notification at iOS
+- iOS mapp engage sdk: 6.0.10
 
 ## 0.0.10
 - Updated Dart version (sdk: ">=3.5.0 <4.0.0")
