@@ -101,10 +101,10 @@ class MappSdk {
 
   static Future<String?> showNotificationsOnForeground(
       bool showNotification) async {
-        if (Platform.isIOS) {
+    if (Platform.isIOS) {
       final String? version = await _channel.invokeMethod(
-        Method.SHOW_NOTIFICATION_ON_FOREGROUND, [showNotification]);
-    return 'successfull $version postponeNotificationRequest method invoked';
+          Method.SHOW_NOTIFICATION_ON_FOREGROUND, [showNotification]);
+      return 'successfull $version postponeNotificationRequest method invoked';
     } else {
       return 'Required only for iOS.';
     }
@@ -204,10 +204,10 @@ class MappSdk {
   /// Only for Android - Request permission to post notifications, for Android 13 and higher
   static Future<bool> requestPermissionPostNotifications() async {
     if (Platform.isIOS) {
-      return false;
+      return true;
     } else {
       return await _channel
-        .invokeMethod(Method.PERSMISSION_REQUEST_POST_NOTIFICATION);
+          .invokeMethod(Method.PERSMISSION_REQUEST_POST_NOTIFICATION);
     }
   }
 }
