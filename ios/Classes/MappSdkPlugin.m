@@ -49,6 +49,7 @@ static FlutterMethodChannel *channel;
   } else if ([@"optIn" isEqualToString:call.method]){
     NSNumber *value = call.arguments[0];
     [[Appoxee shared] disablePushNotifications:![value boolValue] withCompletionHandler:NULL];
+    result([NSString stringWithFormat:@"push enabled: %@", (value ? @"YES" : @"NO")]);
   } else if ([@"isPushEnabled" isEqualToString:call.method]){
     [[Appoxee shared] isPushEnabled:^(NSError * _Nullable appoxeeError, id  _Nullable data) {
         if (!appoxeeError) {

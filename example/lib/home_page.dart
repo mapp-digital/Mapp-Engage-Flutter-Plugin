@@ -60,7 +60,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   void handledRemoteNotification(dynamic arguments) {
-    print("handle remote notification!");
+    print("handle remote notification from flutter level!");
+    _showMyDialog("handle remote notification from flutter level!", "", jsonEncode(arguments));
     print(arguments);
   }
 
@@ -102,6 +103,7 @@ class _HomePageState extends State<HomePage> {
 
   void remoteNotificationHandler(dynamic arguments) {
     print("remote Notification received!");
+    _showMyDialog("handle remote notification from flutter level!", "", jsonEncode(arguments));
     print(arguments);
   }
 
@@ -234,7 +236,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  void onTap(int index) {
+  Future<void> onTap(int index) async {
     FocusManager.instance.primaryFocus?.unfocus();
     if (_screens[index] == "Engage") {
       MappSdk.engage(Config.sdkKey, Config.googleProjectId, Config.server,
@@ -260,9 +262,9 @@ class _HomePageState extends State<HomePage> {
       MappSdk.isPushEnabled().then((bool value) =>
           {_showMyDialog("Push Enabled", "", value ? "YES" : "NO")});
     } else if (_screens[index] == "Opt in") {
-      MappSdk.setPushEnabled(true);
+      await MappSdk.setPushEnabled(true);
     } else if (_screens[index] == "Opt out") {
-      MappSdk.setPushEnabled(false);
+      await MappSdk.setPushEnabled(false);
     } else if (_screens[index] == "Remove Badge Number") {
       MappSdk.removeBadgeNumber();
     } else if (_screens[index] == "Log out") {
