@@ -116,8 +116,10 @@ class MappSdk {
   }
 
   static Future<String?> setPushEnabled(bool optIn) async {
-    final bool isPushEnabled =
-        await _channel.invokeMethod(Method.OPT_IN, [optIn]);
+    final dynamic result = await _channel.invokeMethod(Method.OPT_IN, [optIn]);
+     // Ensure the result is a boolean
+    final bool isPushEnabled = result is bool ? result : result.toString() == 'true';
+
     return 'OptIn set to: $isPushEnabled opted in device with value $optIn';
   }
 
