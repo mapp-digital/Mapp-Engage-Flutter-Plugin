@@ -1,3 +1,6 @@
+## 0.0.12
+- update setPushEnable method on iOS side to return description
+
 ## 0.0.11
 - update method for enabling foreground notification at iOS
 - iOS mapp engage sdk: 6.0.10
