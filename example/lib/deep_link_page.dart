@@ -3,7 +3,7 @@ import 'dart:collection';
 import 'package:flutter/material.dart';
 
 class DeepLinkPage extends StatelessWidget {
-  const DeepLinkPage({Key? key, required this.map}) : super(key: key);
+  const DeepLinkPage({super.key, required this.map});
 
   final HashMap<String, dynamic> map;
 

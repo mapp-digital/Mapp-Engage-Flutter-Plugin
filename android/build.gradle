@@ -1,20 +1,20 @@
-buildscript {
-    repositories {
-        mavenLocal()
-        google()
-        mavenCentral()
-        maven { url "https://maven.google.com/"}
-    }
+// buildscript {
+//     repositories {
+//         mavenLocal()
+//         google()
+//         mavenCentral()
+//         maven { url "https://maven.google.com/"}
+//     }
 
-    dependencies {
-        classpath 'com.android.tools.build:gradle:8.5.2'
-        classpath 'com.google.gms:google-services:4.4.2'
-    }
-}
+//     dependencies {
+//         classpath 'com.android.tools.build:gradle:8.5.2'
+//         classpath 'com.google.gms:google-services:4.4.2'
+//     }
+// }
 
 plugins{
     id "com.android.library"
-    id "com.google.gms.google-services"
+    id "kotlin-android"
 }
 
 rootProject.allprojects {
@@ -28,7 +28,7 @@ rootProject.allprojects {
 
 android {
     namespace 'com.mapp.flutter.sdk'
-    compileSdkVersion = 34
+    compileSdkVersion = 35
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
@@ -37,7 +37,7 @@ android {
 
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 34
+        targetSdkVersion 35
     }
 
     buildFeatures {
@@ -45,9 +45,9 @@ android {
     }
 }
 dependencies{
-    implementation('com.mapp.sdk:mapp-android:6.0.25')
-    implementation "androidx.appcompat:appcompat:1.6.1"
-    implementation platform('com.google.firebase:firebase-bom:33.5.1')
+    implementation('com.mapp.sdk:mapp-android:6.0.28')
+    implementation "androidx.appcompat:appcompat:1.7.1"
+    implementation platform('com.google.firebase:firebase-bom:33.15.0')
     implementation('com.google.firebase:firebase-messaging')
     implementation 'com.google.firebase:firebase-analytics'
 }

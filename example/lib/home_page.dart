@@ -26,7 +26,7 @@ class Config {
 // }
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   State<StatefulWidget> createState() => _HomePageState();
@@ -34,11 +34,11 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   String? _aliasToSetString = '';
-  String? _tagToSetString = '';
-  String? _tagToRemoveString = '';
-  String? _stringToSetString = '';
-  String? _attributeToGetString = '';
-  String? _stringToRemoveString = '';
+  final String? _tagToSetString = '';
+  final String? _tagToRemoveString = '';
+  final String? _stringToSetString = '';
+  final String? _attributeToGetString = '';
+  final String? _stringToRemoveString = '';
 
   List<String> _screens = [];
 
@@ -162,7 +162,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> requestPermissionPostNotifications() async {
     try {
       final result = await MappSdk.requestPermissionPostNotifications();
-      debugPrint("POST NOTIFICATION PERMISSION RESULT: " + result.toString());
+      debugPrint("POST NOTIFICATION PERMISSION RESULT: $result");
       if (!result) {
         _showMyDialog(
             "POST NOTIFICATION", "Permission result", "Permission was denied!");
@@ -293,18 +293,18 @@ class _HomePageState extends State<HomePage> {
       MappSdk.triggerInApp("app_promo");
     } else if (_screens[index] == "Start Geo") {
       MappSdk.startGeoFencing().then((status) {
-        debugPrint("Start Geofencing status:" + status);
+        debugPrint("Start Geofencing status:$status");
         _showMyDialog("Start Geofencing", "", status);
       }).catchError((e) {
-        debugPrint("Start Geofencing error:" + e.toString());
+        debugPrint("Start Geofencing error:$e");
         _showMyDialog("Start Geofencing", "", e.to);
       });
     } else if (_screens[index] == "Stop Geo") {
       MappSdk.stopGeoFencing().then((status) {
-        debugPrint("Stop Geofencing status:" + status);
+        debugPrint("Stop Geofencing status:$status");
         _showMyDialog("Stop Geofencing", "", status);
       }).catchError((e) {
-        debugPrint("Stop Geofencing error:" + e.toString());
+        debugPrint("Stop Geofencing error:$e");
         _showMyDialog("Stop Geofencing", "", e.toString());
       });
     }
