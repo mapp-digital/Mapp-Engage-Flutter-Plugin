@@ -30,14 +30,13 @@ import com.appoxee.internal.logger.Logger;
 import com.appoxee.internal.logger.LoggerFactory;
 import com.appoxee.internal.permission.GeofencePermissions;
 import com.appoxee.internal.permission.GeofencingPermissionsCallback;
-import com.appoxee.internal.permission.PermissionsCallback;
 import com.appoxee.push.NotificationMode;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -365,7 +364,10 @@ public class MappSdkPlugin
 
     private void getFcmToken(@NonNull Result result) {
         try {
-            Appoxee.instance().getFcmToken(result::success);
+            FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
+                String token = task.getResult();
+                result.success(token);
+            });
         } catch (Exception e) {
             result.error(Method.GET_FCM_TOKEN, e.getMessage(), null);
         }
@@ -562,7 +564,7 @@ public class MappSdkPlugin
                     Set<String> set = new ArraySet<>(existingPermissions);
                     set.add(Manifest.permission.POST_NOTIFICATIONS);
                     sharedPrefs.edit().putStringSet("requested_permissions", set).apply();
-                    activity.requestPermissions(new String[] { Manifest.permission.POST_NOTIFICATIONS },
+                    activity.requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS},
                             POST_NOTIFICATION_PERMISSION_REQUEST_CODE);
                 } else {
                     result.error("PERMISSION_PERMANENTLY_DENIED",
@@ -584,7 +586,7 @@ public class MappSdkPlugin
             // shown;
             // it rationale should be shown, we can request permission once again
             if (activity.shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) {
-                activity.requestPermissions(new String[] { Manifest.permission.POST_NOTIFICATIONS },
+                activity.requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS},
                         POST_NOTIFICATION_PERMISSION_REQUEST_CODE);
             } else {
                 // when permission was denied and rationale should not be shown, then permission
@@ -602,7 +604,7 @@ public class MappSdkPlugin
 
     @Override
     public boolean onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-            @NonNull int[] grantResults) {
+                                              @NonNull int[] grantResults) {
         if (requestCode == POST_NOTIFICATION_PERMISSION_REQUEST_CODE) {
             for (int i = 0; i < permissions.length; i++) {
                 String p = permissions[i];
