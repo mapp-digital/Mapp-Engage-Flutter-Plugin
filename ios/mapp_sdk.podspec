@@ -18,7 +18,7 @@ A new flutter plugin project.
   s.dependency 'Flutter'
   s.dependency 'MappSDK', '6.0.11'
   s.dependency 'MappSDKInapp', '6.0.6.10'
-  s.dependency 'MappSDKGeotargeting', '6.0.5'
+  s.dependency 'MappSDKGeotargeting', '6.0.7'
   s.platform = :ios, '10.0'
   s.static_framework = true
   s.swift_version = '5.0'
