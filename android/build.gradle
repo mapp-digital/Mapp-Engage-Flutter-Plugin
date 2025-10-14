@@ -28,7 +28,7 @@ rootProject.allprojects {
 
 android {
     namespace 'com.mapp.flutter.sdk'
-    compileSdkVersion = 35
+    compileSdkVersion = 36
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
@@ -37,7 +37,7 @@ android {
 
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 35
+        targetSdkVersion 36
     }
 
     buildFeatures {
@@ -45,9 +45,9 @@ android {
     }
 }
 dependencies{
-    implementation('com.mapp.sdk:mapp-android:6.0.28')
+    implementation('com.mapp.sdk:mapp-android:6.1.2')
     implementation "androidx.appcompat:appcompat:1.7.1"
-    implementation platform('com.google.firebase:firebase-bom:33.15.0')
+    implementation platform('com.google.firebase:firebase-bom:34.4.0')
     implementation('com.google.firebase:firebase-messaging')
     implementation 'com.google.firebase:firebase-analytics'
 }

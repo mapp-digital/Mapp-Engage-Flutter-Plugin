@@ -20,7 +20,7 @@
         </activity>
         <activity
             android:name="com.mapp.flutter.sdk.HelperActivity"
-            android:exported="false"
+            android:exported="true"
             android:launchMode="singleInstance"
             android:taskAffinity=""
             android:excludeFromRecents="true"
@@ -32,7 +32,7 @@
                 <data android:host="deeplink" />
 
                 <action android:name="com.appoxee.VIEW_DEEPLINK" />
-
+                <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="${applicationId}" />
