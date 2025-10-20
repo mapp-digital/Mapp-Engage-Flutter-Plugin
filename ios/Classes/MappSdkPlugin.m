@@ -27,6 +27,11 @@ static FlutterMethodChannel *channel;
     result([@"iOS " stringByAppendingString:[[UIDevice currentDevice] systemVersion]]);
   } else if ([@"engage" isEqualToString:call.method]){
     NSNumber* serverNumber = call.arguments[2];
+    NSNumber* turnOnNotificationInForeground = false;
+    if (call.arguments.count > 3) {
+       turnOnNotificationInForeground = call.arguments[3];
+    }
+    
     NSLog(@"server: %@", serverNumber);
     [[InAppMessageDelegate sharedObject] initWith:channel];
     [[InAppMessageDelegate sharedObject] addNotificationListeners];
@@ -37,6 +42,7 @@ static FlutterMethodChannel *channel;
     INAPPSERVER inappServ = [self getInappServerKeyFor: serverNumber];
     [[AppoxeeInapp shared] engageWithDelegate:(id)[InAppMessageDelegate sharedObject] with:inappServ];
     [[UNUserNotificationCenter currentNotificationCenter] setDelegate:(id)[PushMessageDelegate sharedObject]];
+    [[Appoxee shared] setShowNotificationsOnForeground:[turnOnNotificationInForeground boolValue]];
     result([NSString stringWithFormat:@"%ld", (long)[Appoxee version]]);
   } else if ([@"postponeNotificationRequest" isEqualToString:call.method]){
     NSNumber *value = call.arguments[0];
@@ -65,6 +71,14 @@ static FlutterMethodChannel *channel;
   } else if ([@"setDeviceAlias" isEqualToString:call.method]){
     NSString* alias = call.arguments[0];
     [[Appoxee shared] setDeviceAlias:alias withCompletionHandler:NULL];
+    if (call.arguments.count > 1) {
+      NSNumber *resendAttributtes = call.arguments[1];
+      [[Appoxee shared] setDeviceAlias:alias withResendAttributes:[resendAttributtes boolValue] withCompletionHandler:^(NSError * _Nullable appoxeeError, id  _Nullable data) {
+         if (appoxeeError != nil) {
+            NSLog(@"%@", appoxeeError.debugDescription);
+        }
+      }];
+    }
   } else if ([@"getDeviceAlias" isEqualToString:call.method]){
     [[Appoxee shared] getDeviceAliasWithCompletionHandler:^(NSError * _Nullable appoxeeError, id  _Nullable data) {
         if (!appoxeeError && [data isKindOfClass:[NSString class]])
@@ -111,6 +125,20 @@ static FlutterMethodChannel *channel;
     NSString* stringValue = call.arguments[1];
     NSString* key = call.arguments[0];
     [[Appoxee shared] setStringValue:stringValue forKey:key withCompletionHandler:NULL];
+  } else if ([@"setCustomAttributes" isEqualToString:call.method]){
+    NSDictionary* attributes = call.arguments[0];
+    [[Appoxee shared] setCustomAttributtes:attributes withCompletionHandler:^(NSError * _Nullable appoxeeError, id  _Nullable data) {
+        if (appoxeeError) {
+            NSLog(@"%@", appoxeeError.debugDescription);
+        }
+    }];
+  } else if ([@"getCustomAttributes" isEqualToString:call.method]){
+      [[Appoxee shared] getCustomAttributes:attributes withCompletionHandler:^(NSError * _Nullable appoxeeError, id  _Nullable data) {
+        if (appoxeeError) {
+            NSLog(@"%@", appoxeeError.debugDescription);
+        }
+        result((NSDictionary*)data[@"get"]);
+    }];
   } else if ([@"fetchCustomFieldByKey" isEqualToString:call.method]){
     NSString* key = call.arguments[0];
     [[Appoxee shared] fetchCustomFieldByKey:key withCompletionHandler:^(NSError * _Nullable appoxeeError, id  _Nullable data) {
