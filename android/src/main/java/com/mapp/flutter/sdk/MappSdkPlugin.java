@@ -249,8 +249,6 @@ public class MappSdkPlugin
             case Method.GET_CUSTOM_ATTRIBUTES:
                 getCustomAttributes(args, result);
                 break;
-            case Method.SHOW_NOTIFICATIONS_ON_FOREGROUND:
-                showNotificationsOnForeground(args, result);
             default:
                 result.notImplemented();
                 break;
@@ -344,7 +342,7 @@ public class MappSdkPlugin
 
     private void triggerInApp(List<Object> args, @NonNull Result result) {
         try {
-            String event = args != null && !args.isEmpty() ? (String) args.get(1) : null;
+            String event = args != null && !args.isEmpty() ? (String) args.get(0) : null;
             Appoxee.instance().triggerInApp(activity, event);
             result.success("");
         } catch (Exception e) {
@@ -489,7 +487,7 @@ public class MappSdkPlugin
 
     private void removeBadgeNumber(@NonNull Result result) {
         Appoxee.removeBadgeNumber(application.getApplicationContext());
-        result.success(true);
+        result.success("OK");
     }
 
     public void inAppMarkAsRead(List<Object> args, @NonNull Result result) {
@@ -723,16 +721,6 @@ public class MappSdkPlugin
             }
         } catch (Exception e) {
             result.error(Method.GET_CUSTOM_ATTRIBUTES, e.getMessage(), null);
-        }
-    }
-
-    private void showNotificationsOnForeground(List<Object> args, @NonNull Result result) {
-        try {
-            boolean showNotificationOnForeground = args != null && !args.isEmpty() && (boolean) args.get(0);
-
-            result.success(true);
-        } catch (Exception e) {
-            result.error(Method.SHOW_NOTIFICATIONS_ON_FOREGROUND, e.getMessage(), null);
         }
     }
 }
