@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:mapp_sdk/notification_mode.dart';
 
 import 'helper_classes.dart';
 import 'method.dart';
@@ -87,9 +88,17 @@ class MappSdk {
   }
 
   static Future<String?> engage(String sdkKey, String googleProjectId,
-      SERVER server, String appID, String tenantID) async {
-    final String? version = await _channel.invokeMethod(
-        Method.ENGAGE, [sdkKey, "", server.index, appID, tenantID]);
+      SERVER server, String appID, String tenantID,
+      [NotificationMode? notificationMode =
+          NotificationMode.backgroundAndForeground]) async {
+    String? version;
+    if (Platform.isAndroid) {
+      version = await _channel.invokeMethod(Method.ENGAGE,
+          [sdkKey, server.index, appID, tenantID, notificationMode?.number]);
+    } else {
+      version = await _channel.invokeMethod(Method.ENGAGE,
+          [sdkKey, server.index, appID, tenantID, notificationMode?.showInForeground]);
+    }
     return 'successfull $version engage method invoked';
   }
 
@@ -117,8 +126,9 @@ class MappSdk {
 
   static Future<String?> setPushEnabled(bool optIn) async {
     final dynamic result = await _channel.invokeMethod(Method.OPT_IN, [optIn]);
-     // Ensure the result is a boolean
-    final bool isPushEnabled = result is bool ? result : result.toString() == 'true';
+    // Ensure the result is a boolean
+    final bool isPushEnabled =
+        result is bool ? result : result.toString() == 'true';
 
     return 'OptIn set to: $isPushEnabled opted in device with value $optIn';
   }
@@ -137,6 +147,13 @@ class MappSdk {
   static Future<String?> setAlias(String alias) async {
     final String? version =
         await _channel.invokeMethod(Method.SET_ALIAS, [alias]);
+    return version;
+  }
+
+  static Future<String?> setAliasWithResend(
+      String alias, bool resendCustomAttributes) async {
+    final String? version = await _channel
+        .invokeMethod(Method.SET_ALIAS, [alias, resendCustomAttributes]);
     return version;
   }
 
@@ -211,5 +228,35 @@ class MappSdk {
       return await _channel
           .invokeMethod(Method.PERSMISSION_REQUEST_POST_NOTIFICATION);
     }
+  }
+
+  static Future<bool> setCustomAttributes(
+      Map<String, dynamic> attributes) async {
+    final bool result =
+        await _channel.invokeMethod(Method.SET_CUSTOM_ATTRIBUTES, [attributes]);
+    return result;
+  }
+
+  static Future<List<String>> getCustomAttributes() async {
+    final List<String> attributes =
+        await _channel.invokeMethod(Method.GET_CUSTOM_ATTRIBUTES) ??
+            List.empty();
+    return attributes.cast<String>();
+  }
+
+  static Future<bool> addTag(String tag) async {
+    final bool result = await _channel.invokeMethod(Method.ADD_TAG, [tag]);
+    return result;
+  }
+
+  static Future<List<String>> getTags() async {
+    final List<String> tags =
+        await _channel.invokeMethod(Method.GET_TAGS) ?? List.empty();
+    return tags.cast<String>();
+  }
+
+  static Future<bool> removeTag(String tag) async {
+    final bool result = await _channel.invokeMethod(Method.REMOVE_TAG, [tag]);
+    return result;
   }
 }
