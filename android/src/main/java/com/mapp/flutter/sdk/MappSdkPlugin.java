@@ -702,6 +702,7 @@ public class MappSdkPlugin
      */
     private void getCustomAttributes(List<Object> args, @NonNull Result result) {
         try {
+            LoggerFactory.getDevLogger().d(args);
             List<String> keys = args != null && !args.isEmpty() ? (List<String>) args.get(0) : Collections.emptyList();
             if (keys != null && !keys.isEmpty()) {
                 Appoxee.instance().getCustomAttributes(keys, new GetCustomAttributesCallback() {

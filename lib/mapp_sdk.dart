@@ -237,11 +237,15 @@ class MappSdk {
     return result;
   }
 
-  static Future<List<String>> getCustomAttributes() async {
-    final List<String> attributes =
-        await _channel.invokeMethod(Method.GET_CUSTOM_ATTRIBUTES) ??
+  static Future<Map<String,String>> getCustomAttributes(List<String>? customAttributes) async {
+    print("Attributes to retrieve: $customAttributes");
+    if(customAttributes==null || customAttributes.isEmpty){
+      return Map.fromEntries([]);
+    } 
+    dynamic attributes =
+        await _channel.invokeMethod(Method.GET_CUSTOM_ATTRIBUTES, [customAttributes]) ??
             List.empty();
-    return attributes.cast<String>();
+    return attributes.cast<String, String>();
   }
 
   static Future<bool> addTag(String tag) async {
