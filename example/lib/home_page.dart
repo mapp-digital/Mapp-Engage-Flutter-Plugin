@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mapp_sdk/notification_mode.dart';
 
 import 'package:mapp_sdk_example/deep_link_page.dart';
 import 'package:mapp_sdk/mapp_sdk.dart';
@@ -61,7 +62,7 @@ class _HomePageState extends State<HomePage> {
   void initMappSdk() async {
     debugPrint("initMappSdk()");
     await MappSdk.engage(Config.sdkKey, Config.googleProjectId, Config.server,
-        Config.appID, Config.tenantID);
+        Config.appID, Config.tenantID, NotificationMode.backgroundAndForeground);
     await initPlatformState();
     await requestPermissionPostNotifications();
     await MappSdk.showNotificationsOnForeground(true);

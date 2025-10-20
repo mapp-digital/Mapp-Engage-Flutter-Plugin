@@ -17,6 +17,7 @@ public interface Method {
     String START_GEOFENCING = "startGeofencing";
     String STOP_GEOFENCING = "stopGeofencing";
     String ADD_TAG = "addTag";
+    String REMOVE_TAG = "removeTag";
     String FETCH_DEVICE_TAGS = "fetchDeviceTags";
     String LOGOUT_WITH_OPT_IN = "logoutWithOptin";
     String IS_DEVICE_REGISTERED = "isDeviceRegistered";
@@ -26,5 +27,10 @@ public interface Method {
     String INAPP_MARK_AS_UNREAD = "inAppMarkAsUnread";
     String INAPP_MARK_AS_DELETED = "inAppMarkAsDeleted";
 
-    String PERSMISSION_REQUEST_POST_NOTIFICATION="requestPermissionPostNotification";
+    String PERSMISSION_REQUEST_POST_NOTIFICATION = "requestPermissionPostNotification";
+
+    String SET_CUSTOM_ATTRIBUTES = "setCustomAttributes";
+    String GET_CUSTOM_ATTRIBUTES = "getCustomAttributes";
+
+    String SHOW_NOTIFICATIONS_ON_FOREGROUND = "showNotificationsOnForeground";
 }

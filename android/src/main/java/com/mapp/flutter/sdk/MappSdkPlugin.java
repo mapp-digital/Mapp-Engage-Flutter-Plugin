@@ -14,6 +14,7 @@ import android.text.TextUtils;
 import android.util.ArraySet;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.FragmentActivity;
@@ -21,6 +22,7 @@ import androidx.fragment.app.FragmentActivity;
 import com.appoxee.Appoxee;
 import com.appoxee.AppoxeeOptions;
 import com.appoxee.DeviceInfo;
+import com.appoxee.GetCustomAttributesCallback;
 import com.appoxee.RequestStatus;
 import com.appoxee.internal.geo.geofencing.GeofenceStatus;
 import com.appoxee.internal.inapp.model.APXInboxMessage;
@@ -36,7 +38,9 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -158,8 +162,6 @@ public class MappSdkPlugin
     public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
         List<Object> args = call.arguments();
         devLogger.d("method: " + call.method);
-        int templateId;
-        String eventId;
         switch (call.method) {
             case Method.GET_PLATFORM_VERSION:
                 result.success("Android " + android.os.Build.VERSION.RELEASE);
@@ -168,7 +170,7 @@ public class MappSdkPlugin
                 engage(args, result);
                 break;
             case Method.SET_DEVICE_ALIAS:
-                setDeviceAlias((String) args.get(0), result);
+                setDeviceAlias(args, result);
                 break;
             case Method.GET_DEVICE_ALIAS:
                 getDeviceAlias(result);
@@ -177,11 +179,10 @@ public class MappSdkPlugin
                 isPushEnabled(result);
                 break;
             case Method.OPT_IN:
-                boolean isEnabled = (boolean) args.get(0);
-                setPushEnabled(isEnabled, result);
+                setPushEnabled(args, result);
                 break;
             case Method.TRIGGER_IN_APP:
-                triggerInApp((String) args.get(0), result);
+                triggerInApp(args, result);
                 break;
             case Method.IS_READY:
                 isReady(result);
@@ -190,8 +191,7 @@ public class MappSdkPlugin
                 getDeviceInfo(result);
                 break;
             case Method.FETCH_INBOX_MESSAGE:
-                templateId = args != null && args.size() > 0 ? (Integer) args.get(0) : -1;
-                fetchInboxMessage(templateId, result);
+                fetchInboxMessage(args, result);
                 break;
             case Method.FETCH_INBOX_MESSAGES:
                 fetchInboxMessages(result);
@@ -200,7 +200,7 @@ public class MappSdkPlugin
                 getFcmToken(result);
                 break;
             case Method.SET_TOKEN:
-                setToken((String) args.get(0), result);
+                setToken(args, result);
                 break;
             case Method.START_GEOFENCING:
                 startGeoFencing(result);
@@ -209,13 +209,16 @@ public class MappSdkPlugin
                 stopGeoFencing(result);
                 break;
             case Method.ADD_TAG:
-                addTag((String) args.get(0), result);
+                addTag(args, result);
+                break;
+            case Method.REMOVE_TAG:
+                removeTag(args, result);
                 break;
             case Method.FETCH_DEVICE_TAGS:
                 getTags(result);
                 break;
             case Method.LOGOUT_WITH_OPT_IN:
-                logOut((Boolean) args.get(0), result);
+                logOut(args, result);
                 break;
             case Method.IS_DEVICE_REGISTERED:
                 isDeviceRegistered(result);
@@ -228,58 +231,83 @@ public class MappSdkPlugin
                 removeBadgeNumber(result);
                 break;
             case Method.INAPP_MARK_AS_READ:
-                if (args == null || args.size() < 2)
-                    return;
-                templateId = Integer.parseInt(args.get(0).toString());
-                eventId = args.get(1).toString();
-                inAppMarkAsRead(templateId, eventId, result);
+                inAppMarkAsRead(args, result);
                 break;
             case Method.INAPP_MARK_AS_UNREAD:
-                if (args == null || args.size() < 2)
-                    return;
-                templateId = Integer.parseInt(args.get(0).toString());
-                eventId = args.get(1).toString();
-                inAppMarkAsUnRead(templateId, eventId, result);
+                inAppMarkAsUnRead(args, result);
                 break;
             case Method.INAPP_MARK_AS_DELETED:
-                if (args == null || args.size() < 2)
-                    return;
-                templateId = Integer.parseInt(args.get(0).toString());
-                eventId = args.get(1).toString();
-                inAppMarkAsDeleted(templateId, eventId, result);
+                inAppMarkAsDeleted(args, result);
                 break;
             case Method.PERSMISSION_REQUEST_POST_NOTIFICATION:
                 this.result = result;
                 requestPermissionPostNotification();
                 break;
+            case Method.SET_CUSTOM_ATTRIBUTES:
+                setCustomAttributes(args, result);
+                break;
+            case Method.GET_CUSTOM_ATTRIBUTES:
+                getCustomAttributes(args, result);
+                break;
+            case Method.SHOW_NOTIFICATIONS_ON_FOREGROUND:
+                showNotificationsOnForeground(args, result);
             default:
                 result.notImplemented();
                 break;
         }
     }
 
+    private NotificationMode getNotificationMode(List<Object> args) {
+        try {
+            int notificationMode = args.size() > 4 ? (Integer) args.get(4) : NotificationMode.BACKGROUND_AND_FOREGROUND.ordinal();
+            return NotificationMode.values()[notificationMode];
+        } catch (Exception e) {
+            return NotificationMode.BACKGROUND_AND_FOREGROUND;
+        }
+    }
+
     private void engage(List<Object> args, @NonNull Result result) {
         try {
-            // [sdkKey, googleProjectId, server.index, appID, tenantID]
+            // [sdkKey, server.index, appID, tenantID, notificationMode]
             AppoxeeOptions options = new AppoxeeOptions();
             options.sdkKey = (String) args.get(0);
-            options.server = getServerByIndex((Integer) args.get(2));
-            options.appID = (String) args.get(3);
-            options.tenantID = (String) args.get(4);
-            options.notificationMode = NotificationMode.BACKGROUND_AND_FOREGROUND;
+            options.server = getServerByIndex((Integer) args.get(1));
+            options.appID = (String) args.get(2);
+            options.tenantID = (String) args.get(3);
+            options.notificationMode = getNotificationMode(args);
             Appoxee.engage(application, options);
             this.result = result;
             Appoxee.instance().addInitListener(onInitCompletedListener);
             Appoxee.instance().setReceiver(PushBroadcastReceiver.class);
             result.success("OK");
+            LoggerFactory.getDevLogger().d("ENGAGE OPTIONS", stringify(options));
         } catch (Exception e) {
             result.error(Method.ENGAGE, e.getMessage(), null);
         }
     }
 
-    private void setDeviceAlias(String alias, @NonNull Result result) {
-        RequestStatus status = Appoxee.instance().setAlias(alias);
-        result.success(alias);
+    /** @noinspection StringBufferReplaceableByString*/
+    private String stringify(AppoxeeOptions options){
+        StringBuilder sb=new StringBuilder();
+        sb.append("\n");
+        sb.append("SDK Key: ").append(options.sdkKey).append("\n");
+        sb.append("Server: ").append(options.server.getValue()).append("\n");
+        sb.append("App ID: ").append(options.appID).append("\n");
+        sb.append("Tenant ID: ").append(options.tenantID).append("\n");
+        sb.append("Notification Mode: ").append(options.notificationMode.name());
+        sb.append("\n");
+        return sb.toString();
+    }
+
+    private void setDeviceAlias(List<Object> args, @NonNull Result result) {
+        if (args != null && !args.isEmpty()) {
+            String alias = (String) args.get(0);
+            boolean resend = args.size() > 1 && (boolean) args.get(1);
+            Appoxee.instance().setAlias(alias, resend);
+            result.success(alias);
+        } else {
+            result.error("NO_ARGS_PROVIDED", "No arguments provided!!!", null);
+        }
     }
 
     private void getDeviceAlias(@NonNull Result result) {
@@ -300,9 +328,10 @@ public class MappSdkPlugin
         }
     }
 
-    private void setPushEnabled(boolean pushEnabled, @NonNull Result result) {
+    private void setPushEnabled(@Nullable List<Object> args, @NonNull Result result) {
         try {
-            RequestStatus status = Appoxee.instance().setPushEnabled(pushEnabled);
+            boolean isEnabled = args != null && !args.isEmpty() && (boolean) args.get(0);
+            RequestStatus status = Appoxee.instance().setPushEnabled(isEnabled);
             if (status == RequestStatus.SUCCESS) {
                 result.success(true);
             } else {
@@ -313,8 +342,9 @@ public class MappSdkPlugin
         }
     }
 
-    private void triggerInApp(String event, @NonNull Result result) {
+    private void triggerInApp(List<Object> args, @NonNull Result result) {
         try {
+            String event = args != null && !args.isEmpty() ? (String) args.get(1) : null;
             Appoxee.instance().triggerInApp(activity, event);
             result.success("");
         } catch (Exception e) {
@@ -344,8 +374,9 @@ public class MappSdkPlugin
         }
     }
 
-    private void fetchInboxMessage(int templateId, @NonNull Result result) {
+    private void fetchInboxMessage(List<Object> args, @NonNull Result result) {
         try {
+            int templateId = args != null && !args.isEmpty() ? (Integer) args.get(0) : -1;
             Appoxee.instance().fetchInboxMessage(templateId);
             handleInAppInboxMessages(result);
         } catch (Exception e) {
@@ -373,8 +404,9 @@ public class MappSdkPlugin
         }
     }
 
-    private void setToken(String token, @NonNull Result result) {
+    private void setToken(List<Object> args, @NonNull Result result) {
         try {
+            String token = (args != null && !args.isEmpty()) ? (String) args.get(0) : null;
             Appoxee.instance().setToken(token);
             result.success(token);
         } catch (Exception e) {
@@ -399,16 +431,31 @@ public class MappSdkPlugin
         }
     }
 
-    private void addTag(String tag, @NonNull Result result) {
+    private void addTag(List<Object> args, @NonNull Result result) {
         try {
+            String tag = (args != null && !args.isEmpty()) ? (String) args.get(0) : null;
             RequestStatus status = Appoxee.instance().addTag(tag);
             if (status == RequestStatus.SUCCESS) {
-                result.success(tag);
+                result.success(true);
             } else {
                 result.error(Method.ADD_TAG, "Error adding TAG!", null);
             }
         } catch (Exception e) {
             result.error(Method.ADD_TAG, e.getMessage(), null);
+        }
+    }
+
+    private void removeTag(List<Object> args, @NonNull Result result) {
+        try {
+            String tag = (args != null && !args.isEmpty()) ? (String) args.get(0) : null;
+            RequestStatus status = Appoxee.instance().removeTag(tag);
+            if (status == RequestStatus.SUCCESS) {
+                result.success(true);
+            } else {
+                result.error(Method.REMOVE_TAG, "Error removing TAG!", null);
+            }
+        } catch (Exception e) {
+            result.error(Method.REMOVE_TAG, "Error removing TAG!", null);
         }
     }
 
@@ -421,8 +468,9 @@ public class MappSdkPlugin
         }
     }
 
-    private void logOut(boolean pushEnabled, @NonNull Result result) {
+    private void logOut(List<Object> args, @NonNull Result result) {
         try {
+            boolean pushEnabled = args != null && !args.isEmpty() && (boolean) args.get(0);
             Appoxee.instance().logOut(pushEnabled);
             result.success("logged out with 'PushEnabled' status: " + pushEnabled);
         } catch (Exception e) {
@@ -441,10 +489,16 @@ public class MappSdkPlugin
 
     private void removeBadgeNumber(@NonNull Result result) {
         Appoxee.removeBadgeNumber(application.getApplicationContext());
+        result.success(true);
     }
 
-    public void inAppMarkAsRead(Integer templateId, String eventId, @NonNull Result result) {
+    public void inAppMarkAsRead(List<Object> args, @NonNull Result result) {
         try {
+            if (args == null || args.size() < 2)
+                return;
+            int templateId = Integer.parseInt(args.get(0).toString());
+            String eventId = args.get(1).toString();
+
             Appoxee.instance().triggerStatistcs(activity, getInAppStatisticsRequestObject(templateId,
                     eventId,
                     InAppStatistics.INBOX_INBOX_MESSAGE_READ_KEY, null, null, null));
@@ -454,8 +508,12 @@ public class MappSdkPlugin
         }
     }
 
-    public void inAppMarkAsUnRead(Integer templateId, String eventId, @NonNull Result result) {
+    public void inAppMarkAsUnRead(List<Object> args, @NonNull Result result) {
         try {
+            if (args == null || args.size() < 2)
+                return;
+            int templateId = Integer.parseInt(args.get(0).toString());
+            String eventId = args.get(1).toString();
             Appoxee.instance().triggerStatistcs(activity, getInAppStatisticsRequestObject(templateId,
                     eventId,
                     InAppStatistics.INBOX_INBOX_MESSAGE_UNREAD_KEY, null, null, null));
@@ -465,8 +523,12 @@ public class MappSdkPlugin
         }
     }
 
-    public void inAppMarkAsDeleted(Integer templateId, String eventId, @NonNull Result result) {
+    public void inAppMarkAsDeleted(List<Object> args, @NonNull Result result) {
         try {
+            if (args == null || args.size() < 2)
+                return;
+            int templateId = Integer.parseInt(args.get(0).toString());
+            String eventId = args.get(1).toString();
             Appoxee.instance().triggerStatistcs(activity, getInAppStatisticsRequestObject(templateId,
                     eventId,
                     InAppStatistics.INBOX_INBOX_MESSAGE_DELETED_KEY, null, null, null));
@@ -618,5 +680,59 @@ public class MappSdkPlugin
             return true;
         } else
             return false;
+    }
+
+    /**
+     * @noinspection unchecked
+     */
+    private void setCustomAttributes(List<Object> args, @NonNull Result result) {
+        try {
+            Map<String, Object> attributes = args != null && !args.isEmpty() ? (Map<String, Object>) args.get(0) : Map.of();
+            if (attributes != null && !attributes.isEmpty()) {
+                Appoxee.instance().setAttributes(attributes);
+                result.success(true);
+            } else {
+                result.error(Method.SET_CUSTOM_ATTRIBUTES, "Empty attributes list!", null);
+            }
+        } catch (Exception e) {
+            result.error(Method.SET_CUSTOM_ATTRIBUTES, e.getMessage(), null);
+        }
+    }
+
+    /**
+     * @noinspection unchecked
+     */
+    private void getCustomAttributes(List<Object> args, @NonNull Result result) {
+        try {
+            List<String> keys = args != null && !args.isEmpty() ? (List<String>) args.get(0) : Collections.emptyList();
+            if (keys != null && !keys.isEmpty()) {
+                Appoxee.instance().getCustomAttributes(keys, new GetCustomAttributesCallback() {
+                    @Override
+                    public void onSuccess(Map<String, String> customAttributes) {
+                        result.success(customAttributes);
+                    }
+
+                    @Override
+                    public void onError(String errorMessage) {
+                        result.error(Method.GET_CUSTOM_ATTRIBUTES, errorMessage, null);
+                    }
+                });
+
+            } else {
+                result.error(Method.GET_CUSTOM_ATTRIBUTES, "Empty attributes keys!", null);
+            }
+        } catch (Exception e) {
+            result.error(Method.GET_CUSTOM_ATTRIBUTES, e.getMessage(), null);
+        }
+    }
+
+    private void showNotificationsOnForeground(List<Object> args, @NonNull Result result) {
+        try {
+            boolean showNotificationOnForeground = args != null && !args.isEmpty() && (boolean) args.get(0);
+
+            result.success(true);
+        } catch (Exception e) {
+            result.error(Method.SHOW_NOTIFICATIONS_ON_FOREGROUND, e.getMessage(), null);
+        }
     }
 }
