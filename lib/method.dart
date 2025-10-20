@@ -45,4 +45,10 @@ class Method {
   static const STOP_GEOFENCING = 'stopGeofencing';
   static const PERSMISSION_REQUEST_POST_NOTIFICATION =
       "requestPermissionPostNotification";
+
+  static const SET_CUSTOM_ATTRIBUTES="setCustomAttributes";
+  static const GET_CUSTOM_ATTRIBUTES="getCustomAttributes";
+  static const ADD_TAG="addTag";
+  static const GET_TAGS="getTags";
+  static const REMOVE_TAG="removeTag";
 }
