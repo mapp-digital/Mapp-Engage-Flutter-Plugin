@@ -168,10 +168,10 @@ class MappSdk {
     return deviceInfo;
   }
 
-  static Future<String?> removeBadgeNumber() async {
-    final String deviceInfo =
+  static Future<String> removeBadgeNumber() async {
+    final String? result =
         await _channel.invokeMethod(Method.REMOVE_BADGE_NUMBER);
-    return deviceInfo;
+    return result ?? "OK";
   }
 
   //InApp methods

@@ -31,6 +31,4 @@ public interface Method {
 
     String SET_CUSTOM_ATTRIBUTES = "setCustomAttributes";
     String GET_CUSTOM_ATTRIBUTES = "getCustomAttributes";
-
-    String SHOW_NOTIFICATIONS_ON_FOREGROUND = "showNotificationsOnForeground";
 }
