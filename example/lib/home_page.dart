@@ -10,12 +10,20 @@ import 'package:mapp_sdk/mapp_sdk.dart';
 import 'package:mapp_sdk/helper_classes.dart';
 
 class Config {
-  static const String sdkKey = "183408d0cd3632.83592719";
-  static const String appID = "206974";
+  static const String sdkKey = "194836e00ab678.39583584";
+  static const String appID = "301677";
   static const String googleProjectId = "785651527831";
-  static const String tenantID = "5963";
-  static const SERVER server = SERVER.L3;
+  static const String tenantID = "33";
+  static const SERVER server = SERVER.TEST;
 }
+
+// class Config {
+//   static const String sdkKey = "183408d0cd3632.83592719";
+//   static const String appID = "206974";
+//   static const String googleProjectId = "785651527831";
+//   static const String tenantID = "5963";
+//   static const SERVER server = SERVER.L3;
+// }
 
 // class Config {
 //   static const String sdkKey = "187b8432cc7644.91361308";
@@ -241,6 +249,7 @@ class _HomePageState extends State<HomePage> {
     if (_screens[index] == "Engage") {
       MappSdk.engage(Config.sdkKey, Config.googleProjectId, Config.server,
           Config.appID, Config.tenantID);
+      MappSdk.showNotificationsOnForeground(true);
       print(
           "ENGAGE WITH PARAMS: SDK_KEY: ${Config.sdkKey}, Server: ${Config.server.toString()}, APP_ID: ${Config.appID}, TENANT_ID: ${Config.tenantID}");
     } else if (_screens[index] == "Set Device Alias") {
