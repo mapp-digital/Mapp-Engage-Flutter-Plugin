@@ -28,7 +28,7 @@ static FlutterMethodChannel *channel;
   } else if ([@"engage" isEqualToString:call.method]){
     NSNumber* serverNumber = call.arguments[2];
     NSNumber* turnOnNotificationInForeground = false;
-    if (call.arguments.count > 3) {
+    if ([(NSArray *)call.arguments count] > 3) {
        turnOnNotificationInForeground = call.arguments[3];
     }
     
@@ -71,7 +71,7 @@ static FlutterMethodChannel *channel;
   } else if ([@"setDeviceAlias" isEqualToString:call.method]){
     NSString* alias = call.arguments[0];
     [[Appoxee shared] setDeviceAlias:alias withCompletionHandler:NULL];
-    if (call.arguments.count > 1) {
+    if ([(NSArray *)call.arguments count] > 1) {
       NSNumber *resendAttributtes = call.arguments[1];
       [[Appoxee shared] setDeviceAlias:alias withResendAttributes:[resendAttributtes boolValue] withCompletionHandler:^(NSError * _Nullable appoxeeError, id  _Nullable data) {
          if (appoxeeError != nil) {
@@ -133,6 +133,7 @@ static FlutterMethodChannel *channel;
         }
     }];
   } else if ([@"getCustomAttributes" isEqualToString:call.method]){
+      NSArray* attributes = call.arguments[0];
       [[Appoxee shared] getCustomAttributes:attributes withCompletionHandler:^(NSError * _Nullable appoxeeError, id  _Nullable data) {
         if (appoxeeError) {
             NSLog(@"%@", appoxeeError.debugDescription);
