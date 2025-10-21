@@ -713,7 +713,7 @@ public class MappSdkPlugin
             LoggerFactory.getDevLogger().d(args);
             List<String> keys = args != null && !args.isEmpty() ? (List<String>) args.get(0) : Collections.emptyList();
             if (keys != null && !keys.isEmpty()) {
-                Appoxee.instance().getCustomAttributes(keys, new GetCustomAttributesCallback() {
+                Appoxee.instance().getCustomAttributes(true, keys, new GetCustomAttributesCallback() {
                     @Override
                     public void onSuccess(Map<String, String> customAttributes) {
                         result.success(customAttributes);
