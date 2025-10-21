@@ -145,16 +145,16 @@ class MappSdk {
   }
 
   static Future<String?> setAlias(String alias) async {
-    final String? version =
+    final String? updatedAlias =
         await _channel.invokeMethod(Method.SET_ALIAS, [alias]);
-    return version;
+    return updatedAlias;
   }
 
   static Future<String?> setAliasWithResend(
       String alias, bool resendCustomAttributes) async {
-    final String? version = await _channel
+    final String? updatedAlias = await _channel
         .invokeMethod(Method.SET_ALIAS, [alias, resendCustomAttributes]);
-    return version;
+    return updatedAlias;
   }
 
   static Future<String> getAlias() async {
@@ -254,7 +254,7 @@ class MappSdk {
   }
 
   static Future<List<String>> getTags() async {
-    final List<String> tags =
+    final List<dynamic> tags =
         await _channel.invokeMethod(Method.GET_TAGS) ?? List.empty();
     return tags.cast<String>();
   }

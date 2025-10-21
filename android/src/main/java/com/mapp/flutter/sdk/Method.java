@@ -18,7 +18,7 @@ public interface Method {
     String STOP_GEOFENCING = "stopGeofencing";
     String ADD_TAG = "addTag";
     String REMOVE_TAG = "removeTag";
-    String FETCH_DEVICE_TAGS = "fetchDeviceTags";
+    String GET_TAGS = "getTags";
     String LOGOUT_WITH_OPT_IN = "logoutWithOptin";
     String IS_DEVICE_REGISTERED = "isDeviceRegistered";
     String SET_REMOTE_MESSAGE = "setRemoteMessage";

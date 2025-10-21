@@ -5,15 +5,25 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mapp_sdk/notification_mode.dart';
+import 'package:mapp_sdk_example/alias/alias_page.dart';
 import 'package:mapp_sdk_example/custom_attributes/custom_attributes_page.dart';
 import 'package:mapp_sdk_example/engage_config.dart';
 
 import 'package:mapp_sdk_example/deep_link_page.dart';
 import 'package:mapp_sdk/mapp_sdk.dart';
 import 'package:mapp_sdk/helper_classes.dart';
+import 'package:mapp_sdk_example/tags/tags_page.dart';
 
-final androidConfig = EngageConfig(sdkKey: "183408d0cd3632.83592719", appID: "206974", tenantID: "5963", server: SERVER.L3);
-final iOSConfig = EngageConfig(sdkKey: "194836e00ab678.39583584", appID: "301677", tenantID: "33", server: SERVER.TEST);
+final androidConfig = EngageConfig(
+    sdkKey: "183408d0cd3632.83592719",
+    appID: "206974",
+    tenantID: "5963",
+    server: SERVER.L3);
+final iOSConfig = EngageConfig(
+    sdkKey: "194836e00ab678.39583584",
+    appID: "301677",
+    tenantID: "33",
+    server: SERVER.TEST);
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -32,7 +42,7 @@ class _HomePageState extends State<HomePage> {
 
   List<String> _screens = [];
 
-  final appConfig= Platform.isAndroid ? androidConfig :iOSConfig;
+  final appConfig = Platform.isAndroid ? androidConfig : iOSConfig;
 
   @override
   void initState() {
@@ -135,14 +145,13 @@ class _HomePageState extends State<HomePage> {
 
     setState(() {
       _screens = [
-        "Set Device Alias Text",
-        "Set Device Alias",
-        "Get Device Alias",
+        "Alias Setup",
         "Device Information",
         "Is Push Enabled",
         "Opt in",
         "Opt out",
         "Custom Attributes",
+        "Tags Setup",
         "Fetch inbox messages",
         "In App: App Open",
         "In App: App Feedback",
@@ -208,51 +217,38 @@ class _HomePageState extends State<HomePage> {
   }
 
   Card _createTextFieldOrButton(int index) {
-    switch (index) {
-      case 0:
-        return Card(
-          child: TextFormField(
-            controller: textHolder,
-            decoration: const InputDecoration(
-                border: UnderlineInputBorder(), labelText: 'Enter alias'),
-            onChanged: (String? value) {
-              _aliasToSetString = value?.trim();
-            },
-          ),
-        );
-      default:
-        return Card(
-          child: ListTile(
-            title: Text(
-              _screens[index],
-              style: TextStyle(color: Theme.of(context).primaryColor),
-              textAlign: TextAlign.center,
-            ),
-            onTap: () {
-              onTap(index);
-            },
-          ),
-        );
-    }
+    return Card(
+      child: ListTile(
+        title: Text(
+          _screens[index],
+          style: TextStyle(color: Theme.of(context).primaryColor),
+          textAlign: TextAlign.center,
+        ),
+        onTap: () {
+          onTap(index);
+        },
+      ),
+    );
   }
 
   Future<void> onTap(int index) async {
     FocusManager.instance.primaryFocus?.unfocus();
     if (_screens[index] == "Engage") {
-      MappSdk.engage(appConfig.sdkKey, "", appConfig.server,
-          appConfig.appID, appConfig.tenantID);
+      MappSdk.engage(appConfig.sdkKey, "", appConfig.server, appConfig.appID,
+          appConfig.tenantID);
       MappSdk.showNotificationsOnForeground(true);
       print(
           "ENGAGE WITH PARAMS: SDK_KEY: ${appConfig.sdkKey}, Server: ${appConfig.server.toString()}, APP_ID: ${appConfig.appID}, TENANT_ID: ${appConfig.tenantID}");
-    } else if (_screens[index] == "Set Device Alias") {
-      if (_aliasToSetString?.isNotEmpty ?? false) {
-        MappSdk.setAlias(_aliasToSetString!).then((value) => clearText());
-      } else {
-        _showMyDialog('Alias', "Not set", "Alias can't be empty");
-      }
-    } else if (_screens[index] == "Get Device Alias") {
-      MappSdk.getAlias().then(
-          (String value) => {_showMyDialog("Show Alias", "Alias:", value)});
+    } else if (_screens[index] == "Alias Setup") {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => AliasPage()),
+      );
+    } else if (_screens[index] == "Tags Setup") {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => TagsPage()),
+      );
     } else if (_screens[index] == "Device Information") {
       String data = '';
       MappSdk.getDeviceInfo().then((Map<String, dynamic>? map) {
@@ -273,7 +269,7 @@ class _HomePageState extends State<HomePage> {
     } else if (_screens[index] == "Log out (& optOut)") {
       MappSdk.logOut(false)
           .then((String? result) => print(result ?? "unknown"));
-    } else if(_screens[index]=="Custom Attributes"){
+    } else if (_screens[index] == "Custom Attributes") {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => CustomAttributesPage()),

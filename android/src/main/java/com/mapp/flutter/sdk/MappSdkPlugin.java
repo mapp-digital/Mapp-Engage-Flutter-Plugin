@@ -38,6 +38,7 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -214,7 +215,7 @@ public class MappSdkPlugin
             case Method.REMOVE_TAG:
                 removeTag(args, result);
                 break;
-            case Method.FETCH_DEVICE_TAGS:
+            case Method.GET_TAGS:
                 getTags(result);
                 break;
             case Method.LOGOUT_WITH_OPT_IN:
@@ -284,9 +285,11 @@ public class MappSdkPlugin
         }
     }
 
-    /** @noinspection StringBufferReplaceableByString*/
-    private String stringify(AppoxeeOptions options){
-        StringBuilder sb=new StringBuilder();
+    /**
+     * @noinspection StringBufferReplaceableByString
+     */
+    private String stringify(AppoxeeOptions options) {
+        StringBuilder sb = new StringBuilder();
         sb.append("\n");
         sb.append("SDK Key: ").append(options.sdkKey).append("\n");
         sb.append("Server: ").append(options.server.getValue()).append("\n");
@@ -460,9 +463,14 @@ public class MappSdkPlugin
     private void getTags(@NonNull Result result) {
         try {
             Set<String> tags = Appoxee.instance().getTags();
-            result.success(tags);
+            List<String> parsedTags = new ArrayList<>();
+            for (String tag : tags) {
+                LoggerFactory.getDevLogger().d("TAG: " + tag);
+                parsedTags.add(tag);
+            }
+            result.success(parsedTags);
         } catch (Exception e) {
-            result.error(Method.FETCH_DEVICE_TAGS, e.getMessage(), null);
+            result.error(Method.GET_TAGS, e.getMessage(), null);
         }
     }
 
