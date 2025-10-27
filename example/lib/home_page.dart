@@ -59,10 +59,11 @@ class _HomePageState extends State<HomePage> {
         "",
         appConfig.server,
         appConfig.appID,
-        appConfig.tenantID,);
+        appConfig.tenantID,
+        NotificationMode.backgroundOnly);
     await initPlatformState();
     await requestPermissionPostNotifications();
-    await MappSdk.showNotificationsOnForeground(true);
+    //await MappSdk.showNotificationsOnForeground(true);
   }
 
   void handledRemoteNotification(dynamic arguments) {
