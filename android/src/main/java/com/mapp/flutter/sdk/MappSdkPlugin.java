@@ -32,7 +32,7 @@ import com.appoxee.internal.logger.Logger;
 import com.appoxee.internal.logger.LoggerFactory;
 import com.appoxee.internal.permission.GeofencePermissions;
 import com.appoxee.internal.permission.GeofencingPermissionsCallback;
-import com.appoxee.internal.service.LifecycleService;
+//import com.appoxee.internal.service.LifecycleService;
 import com.appoxee.push.NotificationMode;
 import com.google.firebase.messaging.FirebaseMessaging;
 
@@ -578,7 +578,7 @@ public class MappSdkPlugin
     public void onAttachedToActivity(@NonNull ActivityPluginBinding binding) {
         devLogger.d("attached to activity");
         this.activity = binding.getActivity();
-        Appoxee.activityStateChanged(activity);
+        //Appoxee.activityStateChanged(activity);
         this.channel.setMethodCallHandler(this);
         this.geofencePermissions = new GeofencePermissions((FragmentActivity) activity, geofencingPermissionsCallback);
         binding.addRequestPermissionsResultListener(this);
@@ -588,7 +588,7 @@ public class MappSdkPlugin
     public void onDetachedFromActivityForConfigChanges() {
         devLogger.d("detached from activity for config changes: "
                 + (activity != null ? activity.getClass().getName() : "null"));
-        Appoxee.activityStateChanged(activity);
+        //Appoxee.activityStateChanged(activity);
         this.activity = null;
         this.channel.setMethodCallHandler(null);
         this.geofencePermissions = null;
@@ -598,6 +598,7 @@ public class MappSdkPlugin
     public void onReattachedToActivityForConfigChanges(@NonNull ActivityPluginBinding binding) {
         devLogger.d("reattached to activity on config changes: " + binding.getActivity());
         this.activity = binding.getActivity();
+        //Appoxee.activityStateChanged(activity);
         this.channel.setMethodCallHandler(this);
         this.geofencePermissions = new GeofencePermissions((FragmentActivity) activity, geofencingPermissionsCallback);
         binding.addRequestPermissionsResultListener(this);
@@ -606,7 +607,7 @@ public class MappSdkPlugin
     @Override
     public void onDetachedFromActivity() {
         devLogger.d("detached from activity: " + (activity != null ? activity.getClass().getName() : "null"));
-        Appoxee.activityStateChanged(activity);
+        //Appoxee.activityStateChanged(activity);
         this.activity = null;
         this.channel.setMethodCallHandler(null);
         this.geofencePermissions = null;
