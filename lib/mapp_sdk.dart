@@ -89,15 +89,15 @@ class MappSdk {
 
   static Future<String?> engage(String sdkKey, String googleProjectId,
       SERVER server, String appID, String tenantID,
-      [NotificationMode? notificationMode =
-          NotificationMode.backgroundAndForeground]) async {
+      /*[NotificationMode? notificationMode =
+          NotificationMode.backgroundAndForeground]*/) async {
     String? version;
     if (Platform.isAndroid) {
       version = await _channel.invokeMethod(Method.ENGAGE,
-          [sdkKey, server.index, appID, tenantID, notificationMode?.number]);
+          [sdkKey, server.index, appID, tenantID, /*notificationMode?.number*/]);
     } else {
       version = await _channel.invokeMethod(Method.ENGAGE,
-          [sdkKey, server.index, appID, tenantID, notificationMode?.showInForeground]);
+          [sdkKey, server.index, appID, tenantID, /*notificationMode?.showInForeground*/]);
     }
     return 'successfull $version engage method invoked';
   }
