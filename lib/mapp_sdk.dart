@@ -2,8 +2,6 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:mapp_sdk/notification_mode.dart';
-
 import 'helper_classes.dart';
 import 'method.dart';
 
@@ -238,7 +236,6 @@ class MappSdk {
   }
 
   static Future<Map<String,String>> getCustomAttributes(List<String>? customAttributes) async {
-    print("Attributes to retrieve: $customAttributes");
     if(customAttributes==null || customAttributes.isEmpty){
       return Map.fromEntries([]);
     } 

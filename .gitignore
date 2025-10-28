@@ -33,4 +33,3 @@ doc/api/
 .idea/libraries/
 /android/property**
 example/android/app/property*
-.DS_Store
