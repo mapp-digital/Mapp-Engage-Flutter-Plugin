@@ -32,7 +32,6 @@ import com.appoxee.internal.logger.Logger;
 import com.appoxee.internal.logger.LoggerFactory;
 import com.appoxee.internal.permission.GeofencePermissions;
 import com.appoxee.internal.permission.GeofencingPermissionsCallback;
-//import com.appoxee.internal.service.LifecycleService;
 import com.appoxee.push.NotificationMode;
 import com.google.firebase.messaging.FirebaseMessaging;
 

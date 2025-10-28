@@ -1,5 +1,14 @@
 ## 0.0.12
 - update setPushEnable method on iOS side to return description
+- Android updates:
+  - Engage SDK version 6.1.2
+  - targetSdkVersion 36
+  - Firebase BOM: 34.4.0
+  - Appocompat: 1.7.1
+  - Migrated gradle apply to declarative plugins block
+- iOS updates:
+  - Engage SDK version 6.1.0
+- code improvements
 
 ## 0.0.11
 - update method for enabling foreground notification at iOS
