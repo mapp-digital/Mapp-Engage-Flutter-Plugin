@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mapp_sdk/notification_mode.dart';
 import 'package:mapp_sdk_example/alias/alias_page.dart';
 import 'package:mapp_sdk_example/custom_attributes/custom_attributes_page.dart';
 import 'package:mapp_sdk_example/engage_config.dart';
