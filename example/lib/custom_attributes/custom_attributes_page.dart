@@ -259,6 +259,9 @@ class _CustomAttributesPageState extends State<CustomAttributesPage>
           attributes.entries.map((e) => "${e.key}: ${e.value}").join("\n");
       debugPrint("Retrieved attributes: $attributes");
       Dialogs.showGlobalDialog("Attributes Retrieved", content);
+    }).catchError((error) {
+      debugPrint("Error retrieving attributes: $error");
+      Dialogs.showGlobalDialog("Error", "Failed to retrieve attributes.");
     });
   }
 
