@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:mapp_sdk/notification_mode.dart';
 import 'helper_classes.dart';
 import 'method.dart';
 
