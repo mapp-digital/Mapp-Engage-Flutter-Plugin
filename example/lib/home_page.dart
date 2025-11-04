@@ -48,7 +48,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     debugPrint("initState()");
     super.initState();
-
+    WidgetsFlutterBinding.ensureInitialized();
     initMappSdk();
   }
 
@@ -60,10 +60,10 @@ class _HomePageState extends State<HomePage> {
         appConfig.server,
         appConfig.appID,
         appConfig.tenantID,
-        NotificationMode.backgroundAndForeground);
+        NotificationMode.backgroundOnly);
     await initPlatformState();
     await requestPermissionPostNotifications();
-    await MappSdk.showNotificationsOnForeground(true);
+    //await MappSdk.showNotificationsOnForeground(true);
   }
 
   void handledRemoteNotification(dynamic arguments) {

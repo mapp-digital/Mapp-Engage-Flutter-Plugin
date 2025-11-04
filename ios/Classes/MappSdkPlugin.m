@@ -26,10 +26,14 @@ static FlutterMethodChannel *channel;
   if ([@"getPlatformVersion" isEqualToString:call.method]) {
     result([@"iOS " stringByAppendingString:[[UIDevice currentDevice] systemVersion]]);
   } else if ([@"engage" isEqualToString:call.method]){
-    NSNumber* serverNumber = call.arguments[2];
-    NSNumber* turnOnNotificationInForeground = false;
-    if ([(NSArray *)call.arguments count] > 3) {
-       turnOnNotificationInForeground = call.arguments[3];
+    NSString *sdkKey = call.arguments[0];
+    NSNumber *serverNumber = call.arguments[1];
+    NSString *appID = call.arguments[2];
+    NSString *tenantID = call.arguments[3];
+    NSNumber *turnOnNotificationInForeground = false;
+
+    if ([(NSArray *)call.arguments count] > 4 && call.arguments[4] != [NSNull null]) {
+       turnOnNotificationInForeground = call.arguments[4];
     }
     
     NSLog(@"server: %@", serverNumber);

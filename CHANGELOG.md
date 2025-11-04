@@ -1,5 +1,20 @@
 ## 0.0.12
 - update setPushEnable method on iOS side to return description
+- added method to set multiple custom attributes in a single call: setCustomAttributes(Map<String,dynamic>)
+- added method get list of attributes for a requested list of keys: getCustomAttributes(List<String>)
+- added method to set alias and trigger resending of custom parameters: setAliasWithResend(String, Boolean)
+- added method to set tag: setTag(String)
+- added method to get tags: getTags()
+- added method to set tag: removeTag(String)
+- Android updates:
+  - Engage SDK version 6.1.2
+  - targetSdkVersion 36
+  - Firebase BOM: 34.4.0
+  - Appocompat: 1.7.1
+  - Migrated gradle apply to declarative plugins block
+- iOS updates:
+  - Engage SDK version 6.1.0
+- code improvements
 
 ## 0.0.11
 - update method for enabling foreground notification at iOS
