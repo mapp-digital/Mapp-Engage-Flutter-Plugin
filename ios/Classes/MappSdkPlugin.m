@@ -103,11 +103,15 @@ static FlutterMethodChannel *channel;
             result(applicationTags);
         }
     }];
-  } else if ([@"addTagsToDevice" isEqualToString:call.method]){
-    NSArray<NSString *> * tags = call.arguments[0];
+  } else if ([@"addTag" isEqualToString:call.method]){
+    NSString* tag = call.arguments[0];
+    NSLog(@"tag preuzet iz fluttera: %@", tag);
+    NSMutableArray<NSString *> * tags = [NSMutableArray array];
+    [tags addObject:tag];
     [[Appoxee shared] addTagsToDevice:tags withCompletionHandler:NULL];
-  } else if ([@"removeTagsFromDevice" isEqualToString:call.method]){
-    NSArray<NSString *> * tags = call.arguments[0];
+  } else if ([@"removeTag" isEqualToString:call.method]){
+    NSString* tag = call.arguments[0];
+    NSArray<NSString *> * tags = @[ tag ];
     [[Appoxee shared] removeTagsFromDevice:tags withCompletionHandler:NULL];
   } else if ([@"setDateValueWithKey" isEqualToString:call.method]){
     NSDate* date = call.arguments[0];
