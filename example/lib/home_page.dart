@@ -60,7 +60,7 @@ class _HomePageState extends State<HomePage> {
         appConfig.server,
         appConfig.appID,
         appConfig.tenantID,
-        NotificationMode.backgroundOnly);
+        NotificationMode.backgroundAndForeground);
     await initPlatformState();
     await requestPermissionPostNotifications();
     //await MappSdk.showNotificationsOnForeground(true);

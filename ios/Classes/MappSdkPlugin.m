@@ -19,7 +19,13 @@ static FlutterMethodChannel *channel;
       methodChannelWithName:@"mapp_sdk"
             binaryMessenger:[registrar messenger]];
   MappSdkPlugin* instance = [[MappSdkPlugin alloc] init];
+    [registrar addApplicationDelegate:instance];
   [registrar addMethodCallDelegate:instance channel:channel];
+}
+
+- (BOOL)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler {
+    NSLog(@"reveive silent notification: %@", userInfo);
+    return NO;
 }
 
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
