@@ -1,5 +1,6 @@
 #import "AppDelegate.h"
 #import "GeneratedPluginRegistrant.h"
+#import <mapp_sdk/PushMessageDelegate.h>
 
 @implementation AppDelegate
 
@@ -16,6 +17,15 @@
 
 - (void)applicationWillEnterForeground:(UIApplication *)application {
     signal(SIGPIPE, SIG_IGN);
+}
+
+- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler {
+    NSLog(@"%@", userInfo);
+    // Forward silent/background push to the plugin pipeline
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"handledPushSilent"
+                                                        object:nil
+                                                       userInfo:userInfo];
+    [super application:application didReceiveRemoteNotification:userInfo fetchCompletionHandler:completionHandler];
 }
 
 @end

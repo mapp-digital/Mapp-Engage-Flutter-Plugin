@@ -5,7 +5,7 @@
 #import <UIKit/UIKit.h>
 #import "AppoxeeSDK.h"
 
-@interface PushMessageDelegate() <AppoxeeDelegate, UIApplicationDelegate, UNUserNotificationCenterDelegate>
+@interface PushMessageDelegate() <AppoxeeDelegate, AppoxeeNotificationDelegate, UIApplicationDelegate, UNUserNotificationCenterDelegate>
 
 @property FlutterMethodChannel* channel;
 
@@ -35,6 +35,9 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self name:@"handledRichContent" object:nil];
     [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(richContentHandler:) name:@"handledRichContent" object:nil];
 
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:@"handledPushSilent" object:nil];
+    [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(silentNotificationHandler:) name:@"handledPushSilent" object:nil];
+
 }
 
 //selectors to forward data to flutter level
@@ -46,6 +49,11 @@
 - (void)richContentHandler:(NSNotification *)notification {
     NSLog(@"notification reveived with rich content %@!", notification);
     [self.channel invokeMethod:@"handledRichContent" arguments:notification.userInfo];
+}
+
+- (void)silentNotificationHandler:(NSNotification *)notification {
+    NSLog(@"notification reveived with silent content %@!", notification);
+    [self.channel invokeMethod:@"handledPushSilent" arguments:notification.userInfo];
 }
 
 //delegate method
@@ -86,8 +94,28 @@
     }
 }
 
-- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler {
-    NSLog(@"remote silent notification %@", userInfo);
+- (void)application:(UIApplication *)application
+didReceiveRemoteNotification:(NSDictionary *)userInfo
+fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler {
+    __block UIBackgroundTaskIdentifier bgTask = UIBackgroundTaskInvalid;
+  bgTask = [[UIApplication sharedApplication] beginBackgroundTaskWithName:@"SilentPushProcessing"
+                                                      expirationHandler:^{
+    if (bgTask != UIBackgroundTaskInvalid) {
+      [[UIApplication sharedApplication] endBackgroundTask:bgTask];
+      bgTask = UIBackgroundTaskInvalid;
+    }
+  }];
+
+    NSLog(@"📩 Received silent push: %@", userInfo);
+    [[NSNotificationCenter defaultCenter] postNotificationName: @"handledPushSilent" object:nil userInfo:userInfo];
+
+
+    completionHandler(UIBackgroundFetchResultNewData);
+
+    if (bgTask != UIBackgroundTaskInvalid) {
+    [[UIApplication sharedApplication] endBackgroundTask:bgTask];
+    bgTask = UIBackgroundTaskInvalid;
+  }
 }
 
 -(NSDictionary *) getPushMessage: (APXPushNotification *) pushMessage {
