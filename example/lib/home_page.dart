@@ -54,13 +54,8 @@ class _HomePageState extends State<HomePage> {
 
   void initMappSdk() async {
     debugPrint("initMappSdk()");
-    await MappSdk.engage(
-        appConfig.sdkKey,
-        "",
-        appConfig.server,
-        appConfig.appID,
-        appConfig.tenantID,
-        NotificationMode.backgroundOnly);
+    await MappSdk.engage(appConfig.sdkKey, "", appConfig.server,
+        appConfig.appID, appConfig.tenantID, NotificationMode.backgroundOnly);
     await initPlatformState();
     await requestPermissionPostNotifications();
     //await MappSdk.showNotificationsOnForeground(true);
@@ -145,6 +140,8 @@ class _HomePageState extends State<HomePage> {
 
     setState(() {
       _screens = [
+        "Log out (With OptIn)",
+        "Log out (With OptOut)",
         "Alias Setup",
         "Device Information",
         "Is Push Enabled",
@@ -160,8 +157,6 @@ class _HomePageState extends State<HomePage> {
         "Remove Badge Number",
         "Lock Orientation",
         "Engage",
-        "Log out",
-        "Log out (& optOut)",
         "Start Geo",
         "Stop Geo"
       ];
@@ -264,9 +259,9 @@ class _HomePageState extends State<HomePage> {
       await MappSdk.setPushEnabled(false);
     } else if (_screens[index] == "Remove Badge Number") {
       MappSdk.removeBadgeNumber();
-    } else if (_screens[index] == "Log out") {
+    } else if (_screens[index] == "Log out (With OptIn)") {
       MappSdk.logOut(true).then((String? result) => print(result ?? "unknown"));
-    } else if (_screens[index] == "Log out (& optOut)") {
+    } else if (_screens[index] == "Log out (With OptOut)") {
       MappSdk.logOut(false)
           .then((String? result) => print(result ?? "unknown"));
     } else if (_screens[index] == "Custom Attributes") {
