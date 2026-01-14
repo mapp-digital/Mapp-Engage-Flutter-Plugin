@@ -1,0 +1,76 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+
+    <application>
+        <activity android:name="com.mapp.flutter.sdk.ActivityListener"
+            android:exported="false"
+            android:taskAffinity=""
+            android:excludeFromRecents="true"
+            android:theme="@style/HelperActivityStyle">
+            <intent-filter>
+                <action android:name="com.mapp.RICH_PUSH" />
+                <category android:name="${applicationId}" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.mapp.flutter.sdk.HelperActivity"
+            android:exported="true"
+            android:launchMode="singleInstance"
+            android:taskAffinity=""
+            android:excludeFromRecents="true"
+            android:theme="@style/HelperActivityStyle">
+
+            <intent-filter android:label="mapp">
+
+                <data android:scheme="apx" />
+                <data android:host="deeplink" />
+
+                <action android:name="com.appoxee.VIEW_DEEPLINK" />
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="${applicationId}" />
+
+            </intent-filter>
+
+        </activity>
+
+        <receiver
+            android:name="com.mapp.flutter.sdk.PushBroadcastReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.appoxee.PUSH_OPENED" />
+                <action android:name="com.appoxee.PUSH_RECEIVED" />
+                <action android:name="com.appoxee.PUSH_DISMISSED" />
+                <action android:name="com.appoxee.BUTTON_CLICKED" />
+
+                <category android:name="${applicationId}" />
+
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+            </intent-filter>
+        </receiver>
+        <service android:name="com.appoxee.push.fcm.MappMessagingService"
+            android:exported="false"
+            tools:node="remove">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+        <service android:name="com.mapp.flutter.sdk.MappFlutterMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+    </application>
+</manifest>

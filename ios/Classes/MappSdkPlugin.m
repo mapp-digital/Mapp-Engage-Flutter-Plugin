@@ -1,0 +1,277 @@
+#import "MappSdkPlugin.h"
+#import "PushMessageDelegate.h"
+#import "InAppMessageDelegate.h"
+#import "AppoxeeLocationManager.h"
+#import "AppoxeeInappSDK.h"
+#import "AppoxeeSDK.h"
+
+static FlutterMethodChannel *channel;
+
+@interface MappSdkPlugin ()
+
+@end
+
+@implementation MappSdkPlugin
+
+
++ (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
+  channel = [FlutterMethodChannel
+      methodChannelWithName:@"mapp_sdk"
+            binaryMessenger:[registrar messenger]];
+  MappSdkPlugin* instance = [[MappSdkPlugin alloc] init];
+    [registrar addApplicationDelegate:instance];
+  [registrar addMethodCallDelegate:instance channel:channel];
+}
+
+- (BOOL)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler {
+    NSLog(@"reveive silent notification: %@", userInfo);
+    return NO;
+}
+
+- (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
+  if ([@"getPlatformVersion" isEqualToString:call.method]) {
+    result([@"iOS " stringByAppendingString:[[UIDevice currentDevice] systemVersion]]);
+  } else if ([@"engage" isEqualToString:call.method]){
+    NSString *sdkKey = call.arguments[0];
+    NSNumber *serverNumber = call.arguments[1];
+    NSString *appID = call.arguments[2];
+    NSString *tenantID = call.arguments[3];
+    NSNumber *turnOnNotificationInForeground = false;
+
+    if ([(NSArray *)call.arguments count] > 4 && call.arguments[4] != [NSNull null]) {
+       turnOnNotificationInForeground = call.arguments[4];
+    }
+    
+    NSLog(@"server: %@", serverNumber);
+    [[InAppMessageDelegate sharedObject] initWith:channel];
+    [[InAppMessageDelegate sharedObject] addNotificationListeners];
+    [[PushMessageDelegate sharedObject] initWith:channel];
+    [[PushMessageDelegate sharedObject] addNotificationListeners];
+    SERVER serv = [self getServerKeyFor:serverNumber];
+    [[Appoxee shared] engageAndAutoIntegrateWithLaunchOptions:NULL andDelegate:(id)[PushMessageDelegate sharedObject] with:serv];
+    INAPPSERVER inappServ = [self getInappServerKeyFor: serverNumber];
+    [[AppoxeeInapp shared] engageWithDelegate:(id)[InAppMessageDelegate sharedObject] with:inappServ];
+    [[UNUserNotificationCenter currentNotificationCenter] setDelegate:(id)[PushMessageDelegate sharedObject]];
+    [[Appoxee shared] setShowNotificationsOnForeground:[turnOnNotificationInForeground boolValue]];
+    result([NSString stringWithFormat:@"%ld", (long)[Appoxee version]]);
+  } else if ([@"postponeNotificationRequest" isEqualToString:call.method]){
+    NSNumber *value = call.arguments[0];
+    [[Appoxee shared] setPostponeNotificationRequest:[value boolValue]];
+  } else if ([@"showNotificationsOnForeground" isEqualToString:call.method]){
+    NSNumber *value = call.arguments[0];
+    [[Appoxee shared] setShowNotificationsOnForeground:[value boolValue]];
+  } else if ([@"isReady" isEqualToString:call.method]) {
+    result([[Appoxee shared] isReady] ? @YES : @NO);
+  } else if ([@"optIn" isEqualToString:call.method]){
+    NSNumber *value = call.arguments[0];
+    [[Appoxee shared] disablePushNotifications:![value boolValue] withCompletionHandler:NULL];
+    result([NSString stringWithFormat:@"push enabled: %@", (value ? @"YES" : @"NO")]);
+  } else if ([@"isPushEnabled" isEqualToString:call.method]){
+    [[Appoxee shared] isPushEnabled:^(NSError * _Nullable appoxeeError, id  _Nullable data) {
+        if (!appoxeeError) {
+            BOOL state = [(NSNumber *)data boolValue];
+            result((NSNumber *)data);
+        } else {
+          result(@NO);
+        }
+    }];
+  } else if ([@"logoutWithOptin" isEqualToString:call.method]){
+    NSNumber *value = call.arguments[0];
+    [[Appoxee shared] logoutWithOptin:[value boolValue]];
+  } else if ([@"setDeviceAlias" isEqualToString:call.method]){
+    NSString* alias = call.arguments[0];
+    [[Appoxee shared] setDeviceAlias:alias withCompletionHandler:NULL];
+    if ([(NSArray *)call.arguments count] > 1) {
+      NSNumber *resendAttributtes = call.arguments[1];
+      [[Appoxee shared] setDeviceAlias:alias withResendAttributes:[resendAttributtes boolValue] withCompletionHandler:^(NSError * _Nullable appoxeeError, id  _Nullable data) {
+         if (appoxeeError != nil) {
+            NSLog(@"%@", appoxeeError.debugDescription);
+        }
+      }];
+    }
+  } else if ([@"getDeviceAlias" isEqualToString:call.method]){
+    [[Appoxee shared] getDeviceAliasWithCompletionHandler:^(NSError * _Nullable appoxeeError, id  _Nullable data) {
+        if (!appoxeeError && [data isKindOfClass:[NSString class]])
+        {
+            NSString *deviceAlias = (NSString *)data;
+            result(deviceAlias);
+        } else {
+          result(@"Error while getting alias!");
+        }
+    }];
+  } else if ([@"fetchDeviceTags" isEqualToString:call.method]){
+    [[Appoxee shared] fetchDeviceTags:^(NSError * _Nullable appoxeeError, id  _Nullable data) {
+        if (!appoxeeError && [data isKindOfClass:[NSArray class]]) {
+            NSArray *deviceTags = (NSArray *)data;
+            result(deviceTags);
+        }
+    }];
+  } else if ([@"fetchApplicationTags" isEqualToString:call.method]){
+    [[Appoxee shared] fetchApplicationTags:^(NSError * _Nullable appoxeeError, id  _Nullable data) {
+        if (!appoxeeError && [data isKindOfClass:[NSArray class]]) {
+            NSArray *applicationTags = (NSArray *)data;
+            result(applicationTags);
+        }
+    }];
+  } else if ([@"addTag" isEqualToString:call.method]){
+    NSString* tag = call.arguments[0];
+    NSLog(@"tag preuzet iz fluttera: %@", tag);
+    NSMutableArray<NSString *> * tags = [NSMutableArray array];
+    [tags addObject:tag];
+    [[Appoxee shared] addTagsToDevice:tags withCompletionHandler:NULL];
+  } else if ([@"removeTag" isEqualToString:call.method]){
+    NSString* tag = call.arguments[0];
+    NSArray<NSString *> * tags = @[ tag ];
+    [[Appoxee shared] removeTagsFromDevice:tags withCompletionHandler:NULL];
+  } else if ([@"setDateValueWithKey" isEqualToString:call.method]){
+    NSDate* date = call.arguments[0];
+    NSString* key = call.arguments[1];
+    [[Appoxee shared] setDateValue:date forKey:key withCompletionHandler:NULL];
+  } else if ([@"setNumberValueWithKey" isEqualToString:call.method]){
+    NSNumber* number = call.arguments[1];
+    NSString* key = call.arguments[0];
+    [[Appoxee shared] setNumberValue:number forKey:key withCompletionHandler:NULL];
+  } else if ([@"incrementNumericKey" isEqualToString:call.method]){
+    NSNumber* number = call.arguments[1];
+    NSString* key = call.arguments[0];
+    [[Appoxee shared] incrementNumericKey:key byNumericValue:number withCompletionHandler:NULL];
+  } else if ([@"setStringValueWithKey" isEqualToString:call.method]){
+    NSString* stringValue = call.arguments[1];
+    NSString* key = call.arguments[0];
+    [[Appoxee shared] setStringValue:stringValue forKey:key withCompletionHandler:NULL];
+  } else if ([@"setCustomAttributes" isEqualToString:call.method]){
+    NSDictionary* attributes = call.arguments[0];
+    [[Appoxee shared] setCustomAttributtes:attributes withCompletionHandler:^(NSError * _Nullable appoxeeError, id  _Nullable data) {
+        if (appoxeeError) {
+            NSLog(@"%@", appoxeeError.debugDescription);
+        }
+    }];
+  } else if ([@"getCustomAttributes" isEqualToString:call.method]){
+      NSArray* attributes = call.arguments[0];
+      [[Appoxee shared] getCustomAttributes:attributes withCompletionHandler:^(NSError * _Nullable appoxeeError, id  _Nullable data) {
+        if (appoxeeError) {
+            NSLog(@"%@", appoxeeError.debugDescription);
+        }
+        result((NSDictionary*)data[@"get"]);
+    }];
+  } else if ([@"fetchCustomFieldByKey" isEqualToString:call.method]){
+    NSString* key = call.arguments[0];
+    [[Appoxee shared] fetchCustomFieldByKey:key withCompletionHandler:^(NSError * _Nullable appoxeeError, id  _Nullable data) {
+        if (!appoxeeError && [data isKindOfClass:[NSDictionary class]]) {
+        NSDictionary *dictionary = (NSDictionary *)data; NSString *key = [[dictionary allKeys] firstObject];
+            id value = dictionary[key]; // can be of the following types: NSString || NSNumber || NSDate }
+        // If there wan't an error, and data object is nil, then value doesn't exist on the device.
+        }
+    }];
+  } else if ([@"getDeviceInfo" isEqualToString:call.method]){
+    APXClientDevice* device = [[Appoxee shared] deviceInfo];
+    NSDictionary *deviceData = [self deviceInfo:device];
+    result(deviceData);
+  } else if ([@"removeBadgeNumber" isEqualToString:call.method]){
+    [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
+  } else if ([@"addTagsToDevice" isEqualToString:call.method]){
+    NSArray<NSString *> * array = call.arguments[0];
+    [[Appoxee shared] addTagsToDevice:array withCompletionHandler:NULL];
+  } else if ([@"removeTagsFromDevice" isEqualToString:call.method]){
+    NSArray<NSString *> * array = call.arguments[0];
+    [[Appoxee shared] removeTagsFromDevice:array withCompletionHandler:NULL];
+  } else if ([@"triggerInApp" isEqualToString:call.method]){
+    NSString * eventName = call.arguments[0];
+    [[AppoxeeInapp shared]reportInteractionEventWithName: eventName andAttributes:NULL];
+  } else if ([@"fetchInboxMessage" isEqualToString:call.method]){
+    [[AppoxeeInapp shared] fetchAPXInBoxMessages];
+    NSLog(@"This is fetchAPXInBox");
+  } else if ([@"fetchInBoxMessageWithMessageId" isEqualToString:call.method]){
+    NSNumber * messageId = call.arguments[0];
+    [[AppoxeeInapp shared] fetchInBoxMessageWithMessageId:[messageId stringValue]];
+    NSLog(@"This is fetchInBoxMessageWithMessageId");
+  } else if ([@"startGeofencing" isEqualToString:call.method]){
+    [[AppoxeeLocationManager shared] setLogLevel:1];
+    [[AppoxeeLocationManager shared] enableLocationMonitoring];
+    NSLog(@"GeoFencing started!");
+    result(@"GEOFENCES_STARTED_OK");
+  } else if ([@"stopGeofencing" isEqualToString:call.method]){
+    [[AppoxeeLocationManager shared] disableLocationMonitoring];
+    NSLog(@"Geofencing stopped!");
+    result(@"GEOFENCES_STOPPED_OK");
+  } else {
+    result(FlutterMethodNotImplemented);
+  }
+}
+
+- (NSDictionary *) deviceInfo: (APXClientDevice *) device {
+    NSMutableDictionary *dict = [[NSMutableDictionary alloc] init];
+    [dict setObject: device.udid forKey:@"udid"];
+    [dict setObject: device.sdkVersion forKey:@"sdkVersion"];
+    [dict setObject:device.locale forKey:@"locale"];
+    [dict setObject:device.timeZone forKey:@"timezone"];
+    [dict setObject:device.hardwearType forKey:@"deviceModel"];
+    [dict setObject:device.osVersion forKey:@"osVersion"];
+    [dict setObject:device.osName forKey:@"osName"];
+    return dict;
+}
+
+-(UIViewController* ) topViewController: (UIViewController* ) base {
+    if ([base isKindOfClass:UINavigationController.class]) {
+        UINavigationController* nav  = (UINavigationController*) base;
+        return [self topViewController:[nav visibleViewController]];
+    }
+    if ([base isKindOfClass:UITabBarController.class]) {
+        UITabBarController* tab = (UITabBarController*) base;
+        UIViewController* selected = [tab selectedViewController];
+        if (selected) {
+            return [self topViewController:selected];
+        }
+    }
+    UIViewController* presented = [base presentedViewController];
+    if (presented) {
+        return [self topViewController:presented];
+    }
+    return base;
+}
+
+- (SERVER)getServerKeyFor: (NSNumber *) name {
+    if ([name intValue] == 0) {
+        return L3;
+    }
+    if ( [name intValue] == 2) {
+        return EMC;
+    }
+    if ( [name intValue] == 3) {
+        return EMC_US;
+    }
+    if ( [name intValue] == 4) {
+        return CROC;
+    }
+    if ([name intValue] == 5) {
+        return TEST;
+    }
+    if ([name intValue] == 6) {
+        return TEST55;
+    }
+    return TEST;
+}
+
+- (INAPPSERVER) getInappServerKeyFor: (NSNumber *) name {
+    if ([name intValue] == 0) {
+        return l3;
+    }
+    if ( [name intValue] == 2) {
+        return eMC;
+    }
+    if ( [name intValue] == 3) {
+        return eMC_US;
+    }
+    if ( [name intValue] == 4) {
+        return cROC;
+    }
+    if ([name intValue] == 5) {
+        return tEST;
+    }
+    if ([name intValue] == 6) {
+        return tEST55;
+    }
+    return tEST;
+}
+
+@end
