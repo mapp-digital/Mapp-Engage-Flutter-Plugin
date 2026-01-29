@@ -46,9 +46,13 @@ class Method {
   static const PERSMISSION_REQUEST_POST_NOTIFICATION =
       "requestPermissionPostNotification";
 
-  static const SET_CUSTOM_ATTRIBUTES="setCustomAttributes";
-  static const GET_CUSTOM_ATTRIBUTES="getCustomAttributes";
-  static const ADD_TAG="addTag";
-  static const GET_TAGS="getTags";
-  static const REMOVE_TAG="removeTag";
+  // custom attributes & tags
+  static const SET_CUSTOM_ATTRIBUTES = "setCustomAttributes";
+  static const GET_CUSTOM_ATTRIBUTES = "getCustomAttributes";
+  static const ADD_TAG = "addTag";
+  static const GET_TAGS = "getTags";
+  static const REMOVE_TAG = "removeTag";
+
+  // delegate FCM payload (from firebase_messaging) to native Mapp SDK
+  static const SET_REMOTE_MESSAGE = "setRemoteMessage";
 }

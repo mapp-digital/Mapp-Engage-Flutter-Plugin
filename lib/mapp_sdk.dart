@@ -34,6 +34,46 @@ class MappSdk {
   static late void Function(dynamic) handledPushDismiss;
   static late void Function(dynamic) handledPushSilent;
 
+  /// Delegate an FCM [RemoteMessage] (received via `firebase_messaging`)
+  /// to the native Mapp SDK on Android.
+  ///
+  /// This is intended for apps that disable the built-in
+  /// `MappFlutterMessagingService` and use the Flutter `firebase_messaging`
+  /// plugin as the only `FirebaseMessagingService`. In that case, when you
+  /// receive a message whose `data` contains the key `"p"`, call:
+  ///
+  /// ```dart
+  /// if (message.data.containsKey('p')) {
+  ///   await MappSdk.handleRemoteMessage(message.data);
+  /// }
+  /// ```
+  ///
+  /// On Android this will forward the payload to the Mapp SDK via the
+  /// plugin's native `MappMessageHandler`. On iOS this call is a no-op,
+  /// since the Mapp SDK integrates directly with APNs via AppDelegate.
+  static Future<void> handleRemoteMessage(
+    Map<String, dynamic> data,
+  ) async {
+    if (!Platform.isAndroid) {
+      // Mapp push handling on iOS is done via the native SDK hooks.
+      return;
+    }
+
+    // Only delegate messages that contain the Mapp-specific key.
+    if (!data.containsKey('p')) {
+      return;
+    }
+
+    try {
+      await _channel.invokeMethod<dynamic>(
+        Method.SET_REMOTE_MESSAGE,
+        [data],
+      );
+    } catch (e) {
+      debugPrint('MappSdk.handleRemoteMessage error: $e');
+    }
+  }
+
   static Future<void> _platformCallHandler(MethodCall call) {
     try {
       debugPrint(call.method);
