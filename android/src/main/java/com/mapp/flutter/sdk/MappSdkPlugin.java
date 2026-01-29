@@ -34,12 +34,14 @@ import com.appoxee.internal.permission.GeofencePermissions;
 import com.appoxee.internal.permission.GeofencingPermissionsCallback;
 import com.appoxee.push.NotificationMode;
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.RemoteMessage;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -225,8 +227,7 @@ public class MappSdkPlugin
                 isDeviceRegistered(result);
                 break;
             case Method.SET_REMOTE_MESSAGE:
-                // TODO get remoteMessage and pass data to a native part
-                // setRemoteMessage(null,result);
+                setRemoteMessage(args, result);
                 break;
             case Method.REMOVE_BADGE_NUMBER:
                 removeBadgeNumber(result);
@@ -471,6 +472,47 @@ public class MappSdkPlugin
             result.success(parsedTags);
         } catch (Exception e) {
             result.error(Method.GET_TAGS, e.getMessage(), null);
+        }
+    }
+
+    /**
+     * Delegate an FCM RemoteMessage (received via firebase_messaging on Android)
+     * to the native Mapp SDK using MappMessageService.
+     *
+     * The Dart side should call Method.SET_REMOTE_MESSAGE with a single
+     * argument: a Map<String, Object> representing the RemoteMessage data.
+     */
+    @SuppressWarnings("unchecked")
+    private void setRemoteMessage(@Nullable List<Object> args, @NonNull Result result) {
+        try {
+            if (args == null || args.isEmpty() || !(args.get(0) instanceof Map)) {
+                result.error(Method.SET_REMOTE_MESSAGE, "Missing or invalid arguments for setRemoteMessage", null);
+                return;
+            }
+
+            Map<String, Object> payload = (Map<String, Object>) args.get(0);
+
+            // Build RemoteMessage with data payload
+            Map<String, String> data = new HashMap<>();
+            for (Map.Entry<String, Object> entry : payload.entrySet()) {
+                if (entry.getKey() != null && entry.getValue() != null) {
+                    data.put(entry.getKey(), String.valueOf(entry.getValue()));
+                }
+            }
+
+            // The Builder "to" argument is not used by Mapp for routing here,
+            // so we can safely use the application package as a dummy target.
+            RemoteMessage remoteMessage = new RemoteMessage.Builder(application.getPackageName() + "@fcm")
+                    .setData(data)
+                    .build();
+
+            // Let the shared MappMessageHandler process this message
+            MappMessageHandler.handle(remoteMessage, application);
+
+            result.success(null);
+        } catch (Exception e) {
+            LoggerFactory.getDevLogger().e("setRemoteMessage", e.getMessage(), e);
+            result.error(Method.SET_REMOTE_MESSAGE, e.getMessage(), null);
         }
     }
 

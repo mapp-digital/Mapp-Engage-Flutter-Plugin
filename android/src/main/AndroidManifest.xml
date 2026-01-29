@@ -59,6 +59,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
             </intent-filter>
         </receiver>
+        <!-- Original Mapp SDK service - removed to use plugin's service -->
         <service android:name="com.appoxee.push.fcm.MappMessagingService"
             android:exported="false"
             tools:node="remove">
@@ -66,6 +67,9 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
+        <!-- Plugin's FirebaseMessagingService - can be removed by app manifest if using custom service -->
+        <!-- To remove this service and use your own, add the following to your app's AndroidManifest.xml: -->
+        <!-- <service android:name="com.mapp.flutter.sdk.MappFlutterMessagingService" tools:node="remove" /> -->
         <service android:name="com.mapp.flutter.sdk.MappFlutterMessagingService"
             android:exported="false">
             <intent-filter>
