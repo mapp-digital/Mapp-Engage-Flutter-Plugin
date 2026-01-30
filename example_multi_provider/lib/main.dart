@@ -68,7 +68,7 @@ class _MyAppState extends State<MyApp> {
         _appConfig.server,
         _appConfig.appID,
         _appConfig.tenantID,
-        NotificationMode.backgroundOnly,
+        NotificationMode.backgroundAndForeground,
       );
 
       // Request notification permission on Android 13+ (no-op on iOS)
