@@ -95,7 +95,7 @@ class _MyAppState extends State<MyApp> {
       ),
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Mapp Multi Provider'),
+          title: const Text('Mapp Multi Provider Test app'),
         ),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
