@@ -4,6 +4,11 @@
 .dart_tool/
 .packages
 build/
+
+# Android Gradle cache and build outputs
+.gradle/
+android/build/
+android/app/build/
 # If you're building an application, you may want to check-in your pubspec.lock
 pubspec.lock
 
