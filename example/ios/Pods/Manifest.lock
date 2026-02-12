@@ -1,0 +1,22 @@
+PODS:
+  - Flutter (1.0.0)
+  - mapp_sdk (0.0.12):
+    - Flutter
+
+DEPENDENCIES:
+  - Flutter (from `Flutter`)
+  - mapp_sdk (from `.symlinks/plugins/mapp_sdk/ios`)
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: Flutter
+  mapp_sdk:
+    :path: ".symlinks/plugins/mapp_sdk/ios"
+
+SPEC CHECKSUMS:
+  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  mapp_sdk: 96e0e8d2d41c3f12b892a79ded40ce79f8308e73
+
+PODFILE CHECKSUM: 53026eaf67b63baa2e316e457f9701dbdf33f41a
+
+COCOAPODS: 1.16.2

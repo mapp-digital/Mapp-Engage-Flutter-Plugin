@@ -1,0 +1,47 @@
+{
+  "name": "mapp_sdk",
+  "version": "0.0.12",
+  "summary": "A new flutter plugin project.",
+  "description": "A new flutter plugin project.",
+  "homepage": "http://mapp.com",
+  "license": {
+    "file": "../LICENSE"
+  },
+  "authors": {
+    "Mapp Digital": "stefan.stevanovic@mapp.com"
+  },
+  "source": {
+    "path": "."
+  },
+  "source_files": "Classes/**/*",
+  "public_header_files": "Classes/**/*.h",
+  "dependencies": {
+    "Flutter": [
+
+    ]
+  },
+  "vendored_frameworks": [
+    "Frameworks/AppoxeeSDK.xcframework",
+    "Frameworks/AppoxeeLocationServices.xcframework",
+    "Frameworks/AppoxeeInapp.xcframework"
+  ],
+  "resources": [
+    "Frameworks/AppoxeeSDKResources.bundle",
+    "Frameworks/AppoxeeInappResources.bundle"
+  ],
+  "requires_arc": true,
+  "frameworks": "WebKit",
+  "libraries": "sqlite3",
+  "platforms": {
+    "ios": "10.0"
+  },
+  "static_framework": true,
+  "swift_versions": "5.0",
+  "pod_target_xcconfig": {
+    "HEADER_SEARCH_PATHS": "$(inherited) \"$(PODS_ROOT)/mapp_sdk/Frameworks/**\" \"$(PODS_ROOT)/../.symlinks/plugins/mapp_sdk/ios/Frameworks/**\"",
+    "FRAMEWORK_SEARCH_PATHS": "$(inherited) \"$(PODS_ROOT)/mapp_sdk/Frameworks\" \"$(PODS_ROOT)/../.symlinks/plugins/mapp_sdk/ios/Frameworks\"",
+    "DEFINES_MODULE": "YES",
+    "EXCLUDED_ARCHS[sdk=iphonesimulator*]": "i386"
+  },
+  "swift_version": "5.0"
+}

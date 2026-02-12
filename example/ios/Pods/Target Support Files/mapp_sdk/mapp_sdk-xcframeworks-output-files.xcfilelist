@@ -1,0 +1,3 @@
+${PODS_XCFRAMEWORKS_BUILD_DIR}/mapp_sdk/AppoxeeSDK.framework
+${PODS_XCFRAMEWORKS_BUILD_DIR}/mapp_sdk/AppoxeeLocationServices.framework
+${PODS_XCFRAMEWORKS_BUILD_DIR}/mapp_sdk/AppoxeeInapp.framework

@@ -1,0 +1,6 @@
+module mapp_sdk {
+  umbrella header "mapp_sdk-umbrella.h"
+
+  export *
+  module * { export * }
+}

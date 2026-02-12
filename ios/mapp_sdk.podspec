@@ -16,14 +16,32 @@ A new flutter plugin project.
   s.source_files = 'Classes/**/*'
   s.public_header_files = 'Classes/**/*.h'
   s.dependency 'Flutter'
-  s.dependency 'MappSDK', '6.1.2'
-  s.dependency 'MappSDKInapp', '6.0.6.10'
-  s.dependency 'MappSDKGeotargeting', '6.0.7'
+  s.vendored_frameworks = [
+    'Frameworks/AppoxeeSDK.xcframework',
+    'Frameworks/AppoxeeLocationServices.xcframework',
+    'Frameworks/AppoxeeInapp.xcframework'
+  ]
+
+  s.resources = [
+    'Frameworks/AppoxeeSDKResources.bundle',
+    'Frameworks/AppoxeeInappResources.bundle'
+  ]
+  s.requires_arc = true
+  s.frameworks = "WebKit"
+  s.library = 'sqlite3'
   s.platform = :ios, '10.0'
   s.static_framework = true
   s.swift_version = '5.0'
 
 
   # Flutter.framework does not contain a i386 slice.
-  s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386'}
+  # Add both the Pods-installed path and the Flutter plugin symlink path
+  # so headers/frameworks are found whether CocoaPods places files in
+  # Pods/mapp_sdk/Frameworks or the Flutter .symlinks location.
+  s.pod_target_xcconfig = {
+    'HEADER_SEARCH_PATHS' => '$(inherited) "$(PODS_ROOT)/mapp_sdk/Frameworks/**" "$(PODS_ROOT)/../.symlinks/plugins/mapp_sdk/ios/Frameworks/**"',
+    'FRAMEWORK_SEARCH_PATHS' => '$(inherited) "$(PODS_ROOT)/mapp_sdk/Frameworks" "$(PODS_ROOT)/../.symlinks/plugins/mapp_sdk/ios/Frameworks"',
+    'DEFINES_MODULE' => 'YES',
+    'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386'
+  }
 end
