@@ -19,7 +19,7 @@ jobs:
       id-token: write # Required for authentication using OIDC
       contents: write # Required to push commit and tag
     runs-on: ubuntu-latest
-    container: dart:stable
+    container: ghcr.io/cirruslabs/flutter:stable
     steps:
       - name: Install git
         run: |
@@ -121,7 +121,7 @@ jobs:
             -d "$(printf '{"tag_name":"%s","name":"%s","generate_release_notes":true}' "${tag}" "${tag}")"
       - name: Install dependencies
         working-directory: repo
-        run: dart pub get
+        run: flutter pub get
       - name: Publish
         working-directory: repo
-        run: dart pub publish --force
+        run: flutter pub publish --force
