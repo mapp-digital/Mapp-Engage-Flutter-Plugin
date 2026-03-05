@@ -1,23 +1,14 @@
 name: Publish to pub.dev
 
 on:
-  workflow_dispatch:
-    inputs:
-      version:
-        description: "Expected version (e.g., 0.0.13). Leave empty to only read current version."
-        required: false
-        type: string
-      update_version:
-        description: "If true, update pubspec.yaml to the provided version before publishing."
-        required: false
-        type: boolean
-        default: false
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+*'
 
 jobs:
   publish:
     permissions:
       id-token: write # Required for authentication using OIDC
-      contents: write # Required to push commit and tag
     runs-on: ubuntu-latest
     container: ghcr.io/cirruslabs/flutter:stable
     steps:
@@ -29,96 +20,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git clone --branch "${GITHUB_REF_NAME}" "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" repo
-      - name: Verify/update version
-        shell: bash
-        working-directory: repo
-        env:
-          INPUT_VERSION: ${{ inputs.version }}
-          UPDATE_VERSION: ${{ inputs.update_version }}
-        run: |
-          set -euo pipefail
-          current_version="$(awk -F': ' '/^version: /{print $2; exit}' pubspec.yaml)"
-          echo "Current pubspec.yaml version: ${current_version}"
-          if [[ -z "${INPUT_VERSION}" ]]; then
-            exit 0
-          fi
-          if [[ "${UPDATE_VERSION}" == "true" ]]; then
-            if [[ "${INPUT_VERSION}" != "${current_version}" ]]; then
-              echo "Updating pubspec.yaml version to ${INPUT_VERSION}"
-              sed -i.bak -E "s/^version: .*/version: ${INPUT_VERSION}/" pubspec.yaml
-              rm -f pubspec.yaml.bak
-            else
-              echo "Version already matches ${INPUT_VERSION}"
-            fi
-          else
-            if [[ "${INPUT_VERSION}" != "${current_version}" ]]; then
-              echo "ERROR: pubspec.yaml version (${current_version}) does not match expected (${INPUT_VERSION})."
-              exit 1
-            fi
-          fi
-      - name: Commit and tag version (if updated)
-        if: ${{ inputs.update_version }}
-        shell: bash
-        working-directory: repo
-        env:
-          INPUT_VERSION: ${{ inputs.version }}
-        run: |
-          set -euo pipefail
-          if [[ -z "${INPUT_VERSION}" ]]; then
-            echo "ERROR: version input is required when update_version is true."
-            exit 1
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          if git diff --quiet; then
-            echo "No changes to commit."
-          else
-            git add pubspec.yaml
-            git commit -m "chore(release): ${INPUT_VERSION}"
-          fi
-          tag="${INPUT_VERSION}"
-          if git rev-parse -q --verify "refs/tags/${tag}" >/dev/null; then
-            echo "Tag ${tag} already exists."
-          else
-            git tag "${tag}"
-            git push origin "HEAD:${GITHUB_REF_NAME}"
-            git push origin "${tag}"
-          fi
-      - name: Create GitHub release (if updated)
-        if: ${{ inputs.update_version }}
-        shell: bash
-        working-directory: repo
-        env:
-          INPUT_VERSION: ${{ inputs.version }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -euo pipefail
-          if [[ -z "${INPUT_VERSION}" ]]; then
-            echo "ERROR: version input is required when update_version is true."
-            exit 1
-          fi
-          tag="${INPUT_VERSION}"
-          api="https://api.github.com/repos/${GITHUB_REPOSITORY}"
-          status="$(curl -s -o /tmp/release.json -w "%{http_code}" \
-            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-            -H "Accept: application/vnd.github+json" \
-            "${api}/releases/tags/${tag}")"
-          if [[ "${status}" == "200" ]]; then
-            echo "Release for ${tag} already exists."
-            exit 0
-          fi
-          if [[ "${status}" != "404" ]]; then
-            echo "Unexpected response checking release: ${status}"
-            cat /tmp/release.json
-            exit 1
-          fi
-          curl -s -o /tmp/release_create.json -w "%{http_code}" \
-            -X POST \
-            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-            -H "Accept: application/vnd.github+json" \
-            "${api}/releases" \
-            -d "$(printf '{"tag_name":"%s","name":"%s","generate_release_notes":true}' "${tag}" "${tag}")"
+          git clone --branch "${GITHUB_REF_NAME}" --depth 1 "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" repo
       - name: Install dependencies
         working-directory: repo
         run: |
@@ -126,6 +28,19 @@ jobs:
           find . -path "*/ios/Pods" -type d -prune -exec rm -rf {} +
           find . -path "*/ios/Podfile.lock" -type f -exec rm -f {} +
           flutter pub get
+      - name: Verify tag matches pubspec version
+        shell: bash
+        working-directory: repo
+        run: |
+          set -euo pipefail
+          tag="${GITHUB_REF_NAME}"
+          version="$(awk -F': ' '/^version: /{print $2; exit}' pubspec.yaml)"
+          echo "Tag: ${tag}"
+          echo "pubspec.yaml version: ${version}"
+          if [[ "${tag}" != "${version}" ]]; then
+            echo "ERROR: Tag (${tag}) does not match pubspec.yaml version (${version})."
+            exit 1
+          fi
       - name: Publish
         working-directory: repo
         run: flutter pub publish --force

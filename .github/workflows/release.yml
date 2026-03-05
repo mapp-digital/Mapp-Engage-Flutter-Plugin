@@ -1,0 +1,107 @@
+name: Release (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release (tag format: 0.0.13, must match pubspec.yaml version)."
+        required: true
+        type: string
+      update_version:
+        description: "Update pubspec.yaml to the provided version before tagging."
+        required: false
+        type: boolean
+        default: true
+
+jobs:
+  release:
+    permissions:
+      contents: write # Required to push commit and tag
+    runs-on: ubuntu-latest
+    container: ghcr.io/cirruslabs/flutter:stable
+    steps:
+      - name: Install git
+        run: |
+          apt-get update
+          apt-get install -y git ca-certificates
+      - name: Clone repository
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git clone --branch "${GITHUB_REF_NAME}" "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" repo
+      - name: Verify/update version
+        shell: bash
+        working-directory: repo
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+          UPDATE_VERSION: ${{ inputs.update_version }}
+        run: |
+          set -euo pipefail
+          current_version="$(awk -F': ' '/^version: /{print $2; exit}' pubspec.yaml)"
+          echo "Current pubspec.yaml version: ${current_version}"
+          if [[ "${UPDATE_VERSION}" == "true" ]]; then
+            if [[ "${INPUT_VERSION}" != "${current_version}" ]]; then
+              echo "Updating pubspec.yaml version to ${INPUT_VERSION}"
+              sed -i.bak -E "s/^version: .*/version: ${INPUT_VERSION}/" pubspec.yaml
+              rm -f pubspec.yaml.bak
+            else
+              echo "Version already matches ${INPUT_VERSION}"
+            fi
+          else
+            if [[ "${INPUT_VERSION}" != "${current_version}" ]]; then
+              echo "ERROR: pubspec.yaml version (${current_version}) does not match expected (${INPUT_VERSION})."
+              exit 1
+            fi
+          fi
+      - name: Commit and tag version
+        shell: bash
+        working-directory: repo
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet; then
+            echo "No changes to commit."
+          else
+            git add pubspec.yaml
+            git commit -m "chore(release): ${INPUT_VERSION}"
+          fi
+          tag="${INPUT_VERSION}"
+          if git rev-parse -q --verify "refs/tags/${tag}" >/dev/null; then
+            echo "Tag ${tag} already exists."
+          else
+            git tag "${tag}"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+            git push origin "${tag}"
+          fi
+      - name: Create GitHub release
+        shell: bash
+        working-directory: repo
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          tag="${INPUT_VERSION}"
+          api="https://api.github.com/repos/${GITHUB_REPOSITORY}"
+          status="$(curl -s -o /tmp/release.json -w "%{http_code}" \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "${api}/releases/tags/${tag}")"
+          if [[ "${status}" == "200" ]]; then
+            echo "Release for ${tag} already exists."
+            exit 0
+          fi
+          if [[ "${status}" != "404" ]]; then
+            echo "Unexpected response checking release: ${status}"
+            cat /tmp/release.json
+            exit 1
+          fi
+          curl -s -o /tmp/release_create.json -w "%{http_code}" \
+            -X POST \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "${api}/releases" \
+            -d "$(printf '{"tag_name":"%s","name":"%s","generate_release_notes":true}' "${tag}" "${tag}")"
