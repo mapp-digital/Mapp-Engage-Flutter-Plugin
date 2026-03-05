@@ -19,11 +19,20 @@ jobs:
       id-token: write # Required for authentication using OIDC
       contents: write # Required to push commit and tag
     runs-on: ubuntu-latest
+    container: dart:stable
     steps:
-      - uses: actions/checkout@v4
-      - uses: dart-lang/setup-dart@v1
+      - name: Install git
+        run: |
+          apt-get update
+          apt-get install -y git ca-certificates
+      - name: Clone repository
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git clone --branch "${GITHUB_REF_NAME}" "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" repo
       - name: Verify/update version
         shell: bash
+        working-directory: repo
         env:
           INPUT_VERSION: ${{ inputs.version }}
           UPDATE_VERSION: ${{ inputs.update_version }}
@@ -51,6 +60,7 @@ jobs:
       - name: Commit and tag version (if updated)
         if: ${{ inputs.update_version }}
         shell: bash
+        working-directory: repo
         env:
           INPUT_VERSION: ${{ inputs.version }}
         run: |
@@ -77,12 +87,41 @@ jobs:
           fi
       - name: Create GitHub release (if updated)
         if: ${{ inputs.update_version }}
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ inputs.version }}
-          name: ${{ inputs.version }}
-          generate_release_notes: true
+        shell: bash
+        working-directory: repo
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${INPUT_VERSION}" ]]; then
+            echo "ERROR: version input is required when update_version is true."
+            exit 1
+          fi
+          tag="${INPUT_VERSION}"
+          api="https://api.github.com/repos/${GITHUB_REPOSITORY}"
+          status="$(curl -s -o /tmp/release.json -w "%{http_code}" \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "${api}/releases/tags/${tag}")"
+          if [[ "${status}" == "200" ]]; then
+            echo "Release for ${tag} already exists."
+            exit 0
+          fi
+          if [[ "${status}" != "404" ]]; then
+            echo "Unexpected response checking release: ${status}"
+            cat /tmp/release.json
+            exit 1
+          fi
+          curl -s -o /tmp/release_create.json -w "%{http_code}" \
+            -X POST \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "${api}/releases" \
+            -d "$(printf '{"tag_name":"%s","name":"%s","generate_release_notes":true}' "${tag}" "${tag}")"
       - name: Install dependencies
+        working-directory: repo
         run: dart pub get
       - name: Publish
+        working-directory: repo
         run: dart pub publish --force
