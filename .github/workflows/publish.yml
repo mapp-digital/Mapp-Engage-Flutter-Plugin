@@ -13,8 +13,17 @@ jobs:
     steps:
       - name: Install prerequisites
         run: |
-          apt-get update
-          apt-get install -y git ca-certificates curl xz-utils jq
+          set -euo pipefail
+          missing=()
+          for cmd in git curl jq xz; do
+            if ! command -v "${cmd}" >/dev/null 2>&1; then
+              missing+=("${cmd}")
+            fi
+          done
+          if [ "${#missing[@]}" -gt 0 ]; then
+            sudo apt-get update
+            sudo apt-get install -y ca-certificates "${missing[@]}"
+          fi
       - name: Clone repository
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -22,8 +31,11 @@ jobs:
           git clone --branch "${GITHUB_REF_NAME}" --depth 1 "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" repo
       - name: Install Flutter SDK
         run: |
-          git clone --depth 1 --branch stable https://github.com/flutter/flutter.git /opt/flutter
-          echo "/opt/flutter/bin" >> "${GITHUB_PATH}"
+          set -euo pipefail
+          flutter_dir="${HOME}/flutter"
+          rm -rf "${flutter_dir}"
+          git clone --depth 1 --branch stable https://github.com/flutter/flutter.git "${flutter_dir}"
+          echo "${flutter_dir}/bin" >> "${GITHUB_PATH}"
       - name: Verify toolchain
         run: |
           flutter --version
