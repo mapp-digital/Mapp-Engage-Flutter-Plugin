@@ -6,3 +6,6 @@ example_mapp_only/ios/Pods/
 example_mapp_only/ios/Podfile.lock
 example_multi_provider/ios/Pods/
 example_multi_provider/ios/Podfile.lock
+example_multi_provider/android/local.properties
+/example_multi_provider/android/local.properties
+**/android/local.properties
