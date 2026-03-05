@@ -2,23 +2,10 @@ PODS:
   - Flutter (1.0.0)
   - mapp_sdk (0.0.12):
     - Flutter
-    - MappSDK (= 6.1.2)
-    - MappSDKGeotargeting (= 6.0.7)
-    - MappSDKInapp (= 6.0.6.10)
-  - MappSDK (6.1.2)
-  - MappSDKGeotargeting (6.0.7):
-    - MappSDK (~> 6.1.0)
-  - MappSDKInapp (6.0.6.10)
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
   - mapp_sdk (from `.symlinks/plugins/mapp_sdk/ios`)
-
-SPEC REPOS:
-  trunk:
-    - MappSDK
-    - MappSDKGeotargeting
-    - MappSDKInapp
 
 EXTERNAL SOURCES:
   Flutter:
@@ -28,10 +15,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
-  mapp_sdk: 74a98518cf988885019f462c26e3bd1708336a8d
-  MappSDK: 634aef822c3bdc726e3b54b291210e35cd77f83e
-  MappSDKGeotargeting: eb654ed6da1a4238c37473d3da32ff02ca4ad5d9
-  MappSDKInapp: 22f4fc98c3c95824e77e1b6e15a67723e687038e
+  mapp_sdk: 96e0e8d2d41c3f12b892a79ded40ce79f8308e73
 
 PODFILE CHECKSUM: 53026eaf67b63baa2e316e457f9701dbdf33f41a
 

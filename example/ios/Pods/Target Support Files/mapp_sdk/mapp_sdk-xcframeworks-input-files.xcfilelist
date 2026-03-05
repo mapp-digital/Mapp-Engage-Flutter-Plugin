@@ -1,0 +1,4 @@
+${PODS_ROOT}/Target Support Files/mapp_sdk/mapp_sdk-xcframeworks.sh
+${PODS_ROOT}/../.symlinks/plugins/mapp_sdk/ios/Frameworks/AppoxeeSDK.xcframework
+${PODS_ROOT}/../.symlinks/plugins/mapp_sdk/ios/Frameworks/AppoxeeLocationServices.xcframework
+${PODS_ROOT}/../.symlinks/plugins/mapp_sdk/ios/Frameworks/AppoxeeInapp.xcframework
