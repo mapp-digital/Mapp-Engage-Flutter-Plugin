@@ -1,3 +1,17 @@
+## 0.0.13
+- Added multi-provider push support on Android:
+  - new `MappMessageHandler` helper for delegating Mapp FCM messages from a custom `FirebaseMessagingService`
+  - new Dart API `MappSdk.handleRemoteMessage(Map<String, dynamic>)` for `firebase_messaging` integration
+  - new method channel `setRemoteMessage`
+- Documentation updates:
+  - added `INTEGRATION_FIREBASE_MESSAGING.md` with multi-provider integration guide
+  - expanded `README.md` with setup and API examples
+- Sample apps updates:
+  - added `example_multi_provider` and updated samples
+  - multi-provider example now uses `NotificationMode.backgroundAndForeground`
+- Android updates:
+  - Firebase BOM: 34.8.0
+
 ## 0.0.12
 - update setPushEnable method on iOS side to return description
 - added method to set multiple custom attributes in a single call: setCustomAttributes(Map<String,dynamic>)
