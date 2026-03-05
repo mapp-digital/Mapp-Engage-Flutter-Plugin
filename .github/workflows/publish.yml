@@ -1,0 +1,88 @@
+name: Publish to pub.dev
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Expected version (e.g., 0.0.13). Leave empty to only read current version."
+        required: false
+        type: string
+      update_version:
+        description: "If true, update pubspec.yaml to the provided version before publishing."
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  publish:
+    permissions:
+      id-token: write # Required for authentication using OIDC
+      contents: write # Required to push commit and tag
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+      - name: Verify/update version
+        shell: bash
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+          UPDATE_VERSION: ${{ inputs.update_version }}
+        run: |
+          set -euo pipefail
+          current_version="$(awk -F': ' '/^version: /{print $2; exit}' pubspec.yaml)"
+          echo "Current pubspec.yaml version: ${current_version}"
+          if [[ -z "${INPUT_VERSION}" ]]; then
+            exit 0
+          fi
+          if [[ "${UPDATE_VERSION}" == "true" ]]; then
+            if [[ "${INPUT_VERSION}" != "${current_version}" ]]; then
+              echo "Updating pubspec.yaml version to ${INPUT_VERSION}"
+              sed -i.bak -E "s/^version: .*/version: ${INPUT_VERSION}/" pubspec.yaml
+              rm -f pubspec.yaml.bak
+            else
+              echo "Version already matches ${INPUT_VERSION}"
+            fi
+          else
+            if [[ "${INPUT_VERSION}" != "${current_version}" ]]; then
+              echo "ERROR: pubspec.yaml version (${current_version}) does not match expected (${INPUT_VERSION})."
+              exit 1
+            fi
+          fi
+      - name: Commit and tag version (if updated)
+        if: ${{ inputs.update_version }}
+        shell: bash
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${INPUT_VERSION}" ]]; then
+            echo "ERROR: version input is required when update_version is true."
+            exit 1
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet; then
+            echo "No changes to commit."
+          else
+            git add pubspec.yaml
+            git commit -m "chore(release): ${INPUT_VERSION}"
+          fi
+          tag="${INPUT_VERSION}"
+          if git rev-parse -q --verify "refs/tags/${tag}" >/dev/null; then
+            echo "Tag ${tag} already exists."
+          else
+            git tag "${tag}"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+            git push origin "${tag}"
+          fi
+      - name: Create GitHub release (if updated)
+        if: ${{ inputs.update_version }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.version }}
+          name: ${{ inputs.version }}
+          generate_release_notes: true
+      - name: Install dependencies
+        run: dart pub get
+      - name: Publish
+        run: dart pub publish --force
