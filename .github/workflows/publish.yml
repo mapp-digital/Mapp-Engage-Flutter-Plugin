@@ -121,7 +121,11 @@ jobs:
             -d "$(printf '{"tag_name":"%s","name":"%s","generate_release_notes":true}' "${tag}" "${tag}")"
       - name: Install dependencies
         working-directory: repo
-        run: flutter pub get
+        run: |
+          # Remove stale iOS Pods that can break symlink resolution in CI
+          find . -path "*/ios/Pods" -type d -prune -exec rm -rf {} +
+          find . -path "*/ios/Podfile.lock" -type f -exec rm -f {} +
+          flutter pub get
       - name: Publish
         working-directory: repo
         run: flutter pub publish --force
