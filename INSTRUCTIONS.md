@@ -45,3 +45,37 @@ The manual release workflow (`.github/workflows/release.yml`) currently pushes t
 Tags pushed that way may not trigger another workflow in GitHub Actions.
 
 Reliable publish trigger: create and push the version tag from local git commands.
+
+## How To Run Tests
+
+Run all commands from repository root unless stated otherwise.
+
+### Flutter Unit + Contract Tests (plugin layer)
+
+```bash
+flutter test test/mapp_sdk_test.dart
+flutter test test/public_api_contract_test.dart
+```
+
+### Android Integration Smoke Matrix (real device/emulator)
+
+This runs through the example app and validates Flutter-to-native plugin wiring on Android.
+
+```bash
+cd example_mapp_only
+flutter pub get
+flutter devices
+flutter test integration_test/android_smoke_matrix_test.dart -d <device-id>
+```
+
+Optional interactive notification-permission check:
+
+```bash
+cd example_mapp_only
+flutter test integration_test/android_smoke_matrix_test.dart -d <device-id> --dart-define=RUN_INTERACTIVE_PERMISSION_MATRIX=true
+```
+
+### Notes
+
+1. `integration_test` requires Android NDK `28.2.13676358` for `example_mapp_only`.
+2. If tests fail due to missing/corrupted NDK, reinstall that NDK version in Android SDK Manager.
