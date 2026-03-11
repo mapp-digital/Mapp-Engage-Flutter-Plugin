@@ -23,7 +23,14 @@ The native approach is **simpler and more reliable** because:
 
 ### Step 1: Create Unified FirebaseMessagingService
 
-Create a new file in your app: `android/app/src/main/java/com/yourcompany/yourapp/UnifiedFirebaseMessagingService.java`
+Create a native Firebase messaging service in your app.
+
+- If your app module is Java, create:
+  `android/app/src/main/java/com/yourcompany/yourapp/UnifiedFirebaseMessagingService.java`
+- If your app module is Kotlin, create:
+  `android/app/src/main/kotlin/com/yourcompany/yourapp/UnifiedFirebaseMessagingService.kt`
+
+#### Java example
 
 ```java
 package com.yourcompany.yourapp;
@@ -68,6 +75,45 @@ public class UnifiedFirebaseMessagingService extends FirebaseMessagingService {
         // For example, show a notification using NotificationManager
         android.util.Log.d("UnifiedFCM", "Non-Mapp message: " + remoteMessage.getData());
         
+        // TODO: Handle non-Mapp messages here
+        // You can use NotificationManager, flutter_local_notifications, etc.
+    }
+}
+```
+
+#### Kotlin example
+
+```kotlin
+package com.yourcompany.yourapp
+
+import android.util.Log
+import com.google.firebase.messaging.FirebaseMessagingService
+import com.google.firebase.messaging.RemoteMessage
+import com.mapp.flutter.sdk.MappMessageHandler
+
+class UnifiedFirebaseMessagingService : FirebaseMessagingService() {
+
+    override fun onNewToken(token: String) {
+        super.onNewToken(token)
+
+        // Forward token to Mapp SDK
+        MappMessageHandler.onNewToken(token, this)
+
+        // TODO: Forward token to your other push providers / backend if needed
+    }
+
+    override fun onMessageReceived(remoteMessage: RemoteMessage) {
+        // Check if this is a Mapp message (has data["p"])
+        if (MappMessageHandler.canHandle(remoteMessage)) {
+            // Delegate to Mapp SDK - it will handle notification display
+            // and all Mapp-specific processing (works in all app states)
+            MappMessageHandler.handle(remoteMessage, this)
+            return
+        }
+
+        // Non-Mapp message - handle with your own logic
+        Log.d("UnifiedFCM", "Non-Mapp message: ${remoteMessage.data}")
+
         // TODO: Handle non-Mapp messages here
         // You can use NotificationManager, flutter_local_notifications, etc.
     }
@@ -178,6 +224,8 @@ Any FCM message without `"p"` in `data` is treated as a regular (non-Mapp) messa
 
 If you want to show notifications for non-Mapp messages, you can do it directly in the native service:
 
+### Java
+
 ```java
 @Override
 public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
@@ -187,16 +235,39 @@ public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
     }
 
     // Non-Mapp message - show notification
-    NotificationManager notificationManager = 
+    NotificationManager notificationManager =
         (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-    
+
     NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "default_channel")
         .setSmallIcon(R.drawable.ic_notification)
-        .setContentTitle(remoteMessage.getNotification().getTitle())
-        .setContentText(remoteMessage.getNotification().getBody())
+        .setContentTitle(remoteMessage.getNotification() != null ? remoteMessage.getNotification().getTitle() : null)
+        .setContentText(remoteMessage.getNotification() != null ? remoteMessage.getNotification().getBody() : null)
         .setAutoCancel(true);
-    
+
     notificationManager.notify(0, builder.build());
+}
+```
+
+### Kotlin
+
+```kotlin
+override fun onMessageReceived(remoteMessage: RemoteMessage) {
+    if (MappMessageHandler.canHandle(remoteMessage)) {
+        MappMessageHandler.handle(remoteMessage, this)
+        return
+    }
+
+    // Non-Mapp message - show notification
+    val notificationManager =
+        getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+    val builder = NotificationCompat.Builder(this, "default_channel")
+        .setSmallIcon(R.drawable.ic_notification)
+        .setContentTitle(remoteMessage.notification?.title)
+        .setContentText(remoteMessage.notification?.body)
+        .setAutoCancel(true)
+
+    notificationManager.notify(0, builder.build())
 }
 ```
 
