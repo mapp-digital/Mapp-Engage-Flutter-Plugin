@@ -27,7 +27,15 @@ import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.PluginRegistry
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import org.json.JSONArray
+import kotlin.coroutines.resume
 
 class MappSdkPlugin :
     FlutterPlugin,
@@ -62,15 +70,22 @@ class MappSdkPlugin :
     private var activity: Activity? = null
     private var permissionResult: MethodChannel.Result? = null
     private lateinit var sharedPrefs: SharedPreferences
+    private var pluginJob: Job? = null
+    private var pluginScope: CoroutineScope? = null
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         application = flutterPluginBinding.applicationContext as Application
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, MAPP_CHANNEL_NAME)
         EventEmitter.attachChannel(channel)
         sharedPrefs = application.getSharedPreferences(SHARED_PREFS_FILE_NAME, Context.MODE_PRIVATE)
+        pluginJob = SupervisorJob()
+        pluginScope = CoroutineScope(pluginJob!! + Dispatchers.Main.immediate)
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+        pluginJob?.cancel()
+        pluginScope = null
+        pluginJob = null
         channel.setMethodCallHandler(null)
         EventEmitter.detachChannel()
     }
@@ -115,26 +130,31 @@ class MappSdkPlugin :
     }
 
     private fun engage(args: List<Any?>?, result: MethodChannel.Result) {
-        val sdkKey = args?.getOrNull(0) as? String
-        val serverIndex = (args?.getOrNull(1) as? Number)?.toInt()
-        val appId = args?.getOrNull(2) as? String
-        val tenantId = args?.getOrNull(3) as? String
+        args?.let { rawArgs ->
+            val sdkKey = rawArgs.getOrNull(0) as? String
+            val serverIndex = (rawArgs.getOrNull(1) as? Number)?.toInt()
+            val appId = rawArgs.getOrNull(2) as? String
+            val tenantId = rawArgs.getOrNull(3) as? String
 
-        if (sdkKey.isNullOrEmpty() || serverIndex == null || appId.isNullOrEmpty() || tenantId.isNullOrEmpty()) {
-            result.error(Method.ENGAGE, "Invalid engage arguments", null)
-            return
-        }
-
-        runCatching {
-            val options = AppoxeeOptions(getServerByIndex(serverIndex), sdkKey, appId, tenantId).apply {
-                notificationMode = getNotificationMode(args)
+            if (sdkKey.isNullOrEmpty() || serverIndex == null || appId.isNullOrEmpty() || tenantId.isNullOrEmpty()) {
+                result.error(Method.ENGAGE, "Invalid engage arguments", null)
+                return
             }
-            cachedOptions = options
-            Appoxee.engage(application, options)
-            Appoxee.instance().setPushBroadcast(PushBroadcastReceiver::class.java)
-            result.success("OK")
-        }.onFailure {
-            result.error(Method.ENGAGE, it.message, null)
+
+            runCatching {
+                val options = AppoxeeOptions(getServerByIndex(serverIndex), sdkKey, appId, tenantId).apply {
+                    notificationMode = getNotificationMode(rawArgs)
+                }
+                cachedOptions = options
+                Appoxee.engage(application, options)
+                Appoxee.instance().setPushBroadcast(PushBroadcastReceiver::class.java)
+                result.success("OK")
+            }.onFailure {
+                result.error(Method.ENGAGE, it.message, null)
+            }
+            return
+        } ?: run {
+            result.error(Method.ENGAGE, "Invalid engage arguments", null)
         }
     }
 
@@ -157,13 +177,18 @@ class MappSdkPlugin :
     }
 
     private fun setDeviceAlias(args: List<Any?>?, result: MethodChannel.Result) {
-        val alias = args?.getOrNull(0) as? String
-        if (alias.isNullOrEmpty()) {
-            result.error(Method.SET_DEVICE_ALIAS, "No alias provided", null)
+        args?.let { rawArgs ->
+            val alias = rawArgs.getOrNull(0) as? String
+            if (alias.isNullOrEmpty()) {
+                result.error(Method.SET_DEVICE_ALIAS, "No alias provided", null)
+                return
+            }
+            val resend = rawArgs.getOrNull(1) as? Boolean ?: false
+            resolveCall(Method.SET_DEVICE_ALIAS, Appoxee.instance().setAlias(alias, resend), result) { alias }
             return
+        } ?: run {
+            result.error(Method.SET_DEVICE_ALIAS, "No alias provided", null)
         }
-        val resend = args?.getOrNull(1) as? Boolean ?: false
-        resolveCall(Method.SET_DEVICE_ALIAS, Appoxee.instance().setAlias(alias, resend), result) { alias }
     }
 
     private fun getDeviceAlias(result: MethodChannel.Result) {
@@ -227,12 +252,17 @@ class MappSdkPlugin :
     }
 
     private fun setToken(args: List<Any?>?, result: MethodChannel.Result) {
-        val token = args?.getOrNull(0) as? String
-        if (token.isNullOrBlank()) {
-            result.error(Method.SET_TOKEN, "Missing token", null)
+        args?.let { rawArgs ->
+            val token = rawArgs.getOrNull(0) as? String
+            if (token.isNullOrBlank()) {
+                result.error(Method.SET_TOKEN, "Missing token", null)
+                return
+            }
+            resolveCall(Method.SET_TOKEN, Appoxee.instance().updateFirebaseToken(token), result) { token }
             return
+        } ?: run {
+            result.error(Method.SET_TOKEN, "Missing token", null)
         }
-        resolveCall(Method.SET_TOKEN, Appoxee.instance().updateFirebaseToken(token), result) { token }
     }
 
     private fun startGeoFencing(result: MethodChannel.Result) {
@@ -244,21 +274,31 @@ class MappSdkPlugin :
     }
 
     private fun addTag(args: List<Any?>?, result: MethodChannel.Result) {
-        val tag = args?.getOrNull(0) as? String
-        if (tag.isNullOrBlank()) {
-            result.error(Method.ADD_TAG, "Missing tag", null)
+        args?.let { rawArgs ->
+            val tag = rawArgs.getOrNull(0) as? String
+            if (tag.isNullOrBlank()) {
+                result.error(Method.ADD_TAG, "Missing tag", null)
+                return
+            }
+            resolveCall(Method.ADD_TAG, Appoxee.instance().addTags(setOf(tag)), result) { it ?: false }
             return
+        } ?: run {
+            result.error(Method.ADD_TAG, "Missing tag", null)
         }
-        resolveCall(Method.ADD_TAG, Appoxee.instance().addTags(setOf(tag)), result) { it ?: false }
     }
 
     private fun removeTag(args: List<Any?>?, result: MethodChannel.Result) {
-        val tag = args?.getOrNull(0) as? String
-        if (tag.isNullOrBlank()) {
-            result.error(Method.REMOVE_TAG, "Missing tag", null)
+        args?.let { rawArgs ->
+            val tag = rawArgs.getOrNull(0) as? String
+            if (tag.isNullOrBlank()) {
+                result.error(Method.REMOVE_TAG, "Missing tag", null)
+                return
+            }
+            resolveCall(Method.REMOVE_TAG, Appoxee.instance().removeTags(setOf(tag)), result) { it ?: false }
             return
+        } ?: run {
+            result.error(Method.REMOVE_TAG, "Missing tag", null)
         }
-        resolveCall(Method.REMOVE_TAG, Appoxee.instance().removeTags(setOf(tag)), result) { it ?: false }
     }
 
     private fun getTags(result: MethodChannel.Result) {
@@ -277,24 +317,29 @@ class MappSdkPlugin :
     }
 
     private fun setRemoteMessage(args: List<Any?>?, result: MethodChannel.Result) {
-        val payload = args?.getOrNull(0) as? Map<*, *>
-        if (payload == null) {
-            result.error(Method.SET_REMOTE_MESSAGE, "Missing or invalid arguments for setRemoteMessage", null)
+        args?.let { rawArgs ->
+            val payload = rawArgs.getOrNull(0) as? Map<*, *>
+            if (payload == null) {
+                result.error(Method.SET_REMOTE_MESSAGE, "Missing or invalid arguments for setRemoteMessage", null)
+                return
+            }
+
+            val data = payload.entries
+                .filter { it.key != null && it.value != null }
+                .associate { it.key.toString() to it.value.toString() }
+
+            runCatching {
+                val remoteMessage = RemoteMessage.Builder("${application.packageName}@fcm")
+                    .setData(data)
+                    .build()
+                MappMessageHandler.handle(remoteMessage, application)
+                result.success(null)
+            }.onFailure {
+                result.error(Method.SET_REMOTE_MESSAGE, it.message, null)
+            }
             return
-        }
-
-        val data = payload.entries
-            .filter { it.key != null && it.value != null }
-            .associate { it.key.toString() to it.value.toString() }
-
-        runCatching {
-            val remoteMessage = RemoteMessage.Builder("${application.packageName}@fcm")
-                .setData(data)
-                .build()
-            MappMessageHandler.handle(remoteMessage, application)
-            result.success(null)
-        }.onFailure {
-            result.error(Method.SET_REMOTE_MESSAGE, it.message, null)
+        } ?: run {
+            result.error(Method.SET_REMOTE_MESSAGE, "Missing or invalid arguments for setRemoteMessage", null)
         }
     }
 
@@ -304,66 +349,81 @@ class MappSdkPlugin :
         method: String,
         result: MethodChannel.Result,
     ) {
-        val templateId = (args?.getOrNull(0) as? Number)?.toLong()
-        if (templateId == null) {
-            result.error(method, "Missing template id", null)
-            return
-        }
+        args?.let { rawArgs ->
+            val templateId = (rawArgs.getOrNull(0) as? Number)?.toLong()
+            if (templateId == null) {
+                result.error(method, "Missing template id", null)
+                return
+            }
 
-        Appoxee.instance().fetchInboxMessage(templateId)
-            .enqueue(object : MappCallback<InboxMessage?> {
-                override fun onResult(fetchResult: MappResult<InboxMessage?>) {
-                    if (!fetchResult.isSuccess() || fetchResult.getData() == null) {
-                        result.error(method, fetchResult.getError()?.message ?: "Inbox message not found", null)
-                        return
-                    }
+            Appoxee.instance().fetchInboxMessage(templateId)
+                .enqueue(object : MappCallback<InboxMessage?> {
+                    override fun onResult(fetchResult: MappResult<InboxMessage?>) {
+                        if (!fetchResult.isSuccess() || fetchResult.getData() == null) {
+                            result.error(method, fetchResult.getError()?.message ?: "Inbox message not found", null)
+                            return
+                        }
 
-                    val message = fetchResult.getData() ?: return
-                    Appoxee.instance().updateInboxMessageStatus(message, status)
-                        .enqueue(object : MappCallback<Boolean> {
-                            override fun onResult(updateResult: MappResult<Boolean>) {
-                                if (updateResult.isSuccess()) {
-                                    result.success(updateResult.getData() ?: false)
-                                } else {
-                                    result.error(
-                                        method,
-                                        updateResult.getError()?.message ?: "Failed to update inbox status",
-                                        null,
-                                    )
+                        val message = fetchResult.getData() ?: return
+                        Appoxee.instance().updateInboxMessageStatus(message, status)
+                            .enqueue(object : MappCallback<Boolean> {
+                                override fun onResult(updateResult: MappResult<Boolean>) {
+                                    if (updateResult.isSuccess()) {
+                                        result.success(updateResult.getData() ?: false)
+                                    } else {
+                                        result.error(
+                                            method,
+                                            updateResult.getError()?.message ?: "Failed to update inbox status",
+                                            null,
+                                        )
+                                    }
                                 }
-                            }
-                        })
-                }
-            })
+                            })
+                    }
+                })
+            return
+        } ?: run {
+            result.error(method, "Missing template id", null)
+        }
     }
 
     private fun setCustomAttributes(args: List<Any?>?, result: MethodChannel.Result) {
-        val attributes = args?.getOrNull(0) as? Map<*, *>
-        if (attributes == null || attributes.isEmpty()) {
-            result.error(Method.SET_CUSTOM_ATTRIBUTES, "Empty attributes list!", null)
+        args?.let { rawArgs ->
+            val attributes = rawArgs.getOrNull(0) as? Map<*, *>
+            if (attributes == null || attributes.isEmpty()) {
+                result.error(Method.SET_CUSTOM_ATTRIBUTES, "Empty attributes list!", null)
+                return
+            }
+
+            val normalized = attributes.entries.associate { entry ->
+                entry.key.toString() to entry.value
+            }
+
+            resolveCall(Method.SET_CUSTOM_ATTRIBUTES, Appoxee.instance().addCustomAttributes(normalized), result) { it ?: false }
             return
+        } ?: run {
+            result.error(Method.SET_CUSTOM_ATTRIBUTES, "Empty attributes list!", null)
         }
-
-        val normalized = attributes.entries.associate { entry ->
-            entry.key.toString() to entry.value
-        }
-
-        resolveCall(Method.SET_CUSTOM_ATTRIBUTES, Appoxee.instance().addCustomAttributes(normalized), result) { it ?: false }
     }
 
     private fun getCustomAttributes(args: List<Any?>?, result: MethodChannel.Result) {
-        val keys = (args?.getOrNull(0) as? List<*>)
-            ?.mapNotNull { it?.toString() }
-            ?.toSet()
-            .orEmpty()
+        args?.let { rawArgs ->
+            val keys = (rawArgs.getOrNull(0) as? List<*>)
+                ?.mapNotNull { it?.toString() }
+                ?.toSet()
+                .orEmpty()
 
-        if (keys.isEmpty()) {
-            result.error(Method.GET_CUSTOM_ATTRIBUTES, "Empty attributes keys!", null)
+            if (keys.isEmpty()) {
+                result.error(Method.GET_CUSTOM_ATTRIBUTES, "Empty attributes keys!", null)
+                return
+            }
+
+            resolveCall(Method.GET_CUSTOM_ATTRIBUTES, Appoxee.instance().getCustomAttributes(keys), result) { attrs ->
+                attrs?.mapValues { (_, value) -> value?.toString().orEmpty() } ?: emptyMap<String, String>()
+            }
             return
-        }
-
-        resolveCall(Method.GET_CUSTOM_ATTRIBUTES, Appoxee.instance().getCustomAttributes(keys), result) { attrs ->
-            attrs?.mapValues { (_, value) -> value?.toString().orEmpty() } ?: emptyMap<String, String>()
+        } ?: run {
+            result.error(Method.GET_CUSTOM_ATTRIBUTES, "Empty attributes keys!", null)
         }
     }
 
@@ -452,14 +512,38 @@ class MappSdkPlugin :
         method: String,
         call: Call<T>,
         result: MethodChannel.Result,
-        mapper: (T?) -> R = { it as R },
+        mapper: (T?) -> R,
     ) {
-        call.enqueue(object : MappCallback<T> {
-            override fun onResult(response: MappResult<T>) {
-                if (response.isSuccess()) {
-                    result.success(mapper(response.getData()))
-                } else {
-                    result.error(method, response.getError()?.message ?: "Unknown error", null)
+        val scope = pluginScope
+        if (scope == null) {
+            result.error(method, "Plugin is not attached to engine", null)
+            return
+        }
+
+        scope.launch {
+            val response = try {
+                call.asSuspend()
+            } catch (throwable: Throwable) {
+                if (throwable is CancellationException) {
+                    return@launch
+                }
+                result.error(method, throwable.message ?: "Unknown error", null)
+                return@launch
+            }
+
+            if (response.isSuccess()) {
+                result.success(mapper(response.getData()))
+            } else {
+                result.error(method, response.getError()?.message ?: "Unknown error", null)
+            }
+        }
+    }
+
+    private suspend fun <T> Call<T>.asSuspend(): MappResult<T> = suspendCancellableCoroutine { continuation ->
+        enqueue(object : MappCallback<T> {
+            override fun onResult(result: MappResult<T>) {
+                if (continuation.isActive) {
+                    continuation.resume(result)
                 }
             }
         })
