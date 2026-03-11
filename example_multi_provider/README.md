@@ -29,16 +29,16 @@ public class UnifiedFirebaseMessagingService extends FirebaseMessagingService {
     public void onNewToken(@NonNull String token) {
         super.onNewToken(token);
         // Forward token to Mapp SDK
-        MappMessageHandler.INSTANCE.onNewToken(token, this);
+        MappMessageHandler.onNewToken(token, this);
         // TODO: Forward to your other providers
     }
 
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         // Check if Mapp message (has data["p"])
-        if (MappMessageHandler.INSTANCE.canHandle(remoteMessage)) {
+        if (MappMessageHandler.canHandle(remoteMessage)) {
             // Delegate to Mapp SDK - handles notification display in all states
-            MappMessageHandler.INSTANCE.handle(remoteMessage, this);
+            MappMessageHandler.handle(remoteMessage, this);
             return;
         }
 

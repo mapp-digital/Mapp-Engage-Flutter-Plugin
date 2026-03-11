@@ -8,11 +8,13 @@ import com.google.firebase.messaging.RemoteMessage
 
 object MappMessageHandler {
 
+    @JvmStatic
     fun canHandle(remoteMessage: RemoteMessage?): Boolean {
         val message = remoteMessage ?: return false
         return message.data.containsKey("p")
     }
 
+    @JvmStatic
     fun handle(remoteMessage: RemoteMessage?, context: Context?) {
         if (remoteMessage == null || context == null) {
             return
@@ -28,6 +30,7 @@ object MappMessageHandler {
         }
     }
 
+    @JvmStatic
     fun onNewToken(token: String?, context: Context?) {
         if (token.isNullOrBlank() || context == null) {
             return
@@ -41,6 +44,7 @@ object MappMessageHandler {
         }
     }
 
+    @JvmStatic
     fun ensureSdkInitialization(context: Context) {
         runCatching {
             val sdk = Appoxee.instance()
