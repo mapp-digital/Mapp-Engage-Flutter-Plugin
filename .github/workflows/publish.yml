@@ -9,7 +9,7 @@ jobs:
   publish:
     permissions:
       id-token: write # Required for authentication using OIDC
-    runs-on: ubuntu-latest
+    runs-on: ubuntau-latest
     steps:
       - name: Install prerequisites
         run: |
