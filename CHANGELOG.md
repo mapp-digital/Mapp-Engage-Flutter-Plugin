@@ -1,4 +1,4 @@
-## 0.0.14
+## 0.1.0
 - Android updates:
   - Engage SDK version 7.0.2
 
