@@ -60,7 +60,7 @@
             </intent-filter>
         </receiver>
         <!-- Original Mapp SDK service - removed to use plugin's service -->
-        <service android:name="com.appoxee.push.fcm.MappMessagingService"
+        <service android:name="com.appoxee.shared.MappMessagingService"
             android:exported="false"
             tools:node="remove">
             <intent-filter>

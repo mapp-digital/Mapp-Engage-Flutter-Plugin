@@ -34,7 +34,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final String? _aliasToSetString = '';
+  final String _aliasToSetString = '';
   final String _tagToSetString = '';
   final String _tagToRemoveString = '';
   final String _stringToSetString = '';

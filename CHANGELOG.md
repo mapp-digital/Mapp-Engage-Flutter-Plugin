@@ -1,3 +1,7 @@
+## 0.1.0
+- Android updates:
+  - Engage SDK version 7.0.2
+
 ## 0.0.13
 - Added multi-provider push support on Android:
   - new `MappMessageHandler` helper for delegating Mapp FCM messages from a custom `FirebaseMessagingService`
