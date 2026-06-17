@@ -1,3 +1,12 @@
+## 0.1.1
+- Android updates:
+  - Removed `kotlin-android` plugin from `build.gradle`
+  - Updated Gradle wrapper to version 9.4.1
+  - Updated Android Gradle Plugin to version 9.2.1
+  - Added Android build feature flags to `gradle.properties`
+- iOS updates:
+  - Updated AppoxeeInapp to version 6.0.11 with improved statistics
+
 ## 0.1.0
 - Android updates:
   - Engage SDK version 7.0.2
