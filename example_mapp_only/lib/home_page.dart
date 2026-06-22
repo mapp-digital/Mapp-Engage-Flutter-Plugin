@@ -56,7 +56,7 @@ class _HomePageState extends State<HomePage> {
   void initMappSdk() async {
     debugPrint("initMappSdk()");
     await MappSdk.engage(appConfig.sdkKey, "", appConfig.server,
-        appConfig.appID, appConfig.tenantID, NotificationMode.backgroundOnly);
+        appConfig.appID, appConfig.tenantID, NotificationMode.backgroundAndForeground);
     await initPlatformState();
     await requestPermissionPostNotifications();
     //await MappSdk.showNotificationsOnForeground(true);

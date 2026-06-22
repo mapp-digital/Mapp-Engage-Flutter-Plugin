@@ -2,7 +2,7 @@ package com.mapp.flutter.sdk
 
 import android.os.Build
 import com.appoxee.internal.model.response.DevicePayload
-import com.appoxee.internal.model.response.inbox.InboxMessage
+import com.appoxee.shared.InboxMessage
 import com.appoxee.shared.MappPush
 import org.json.JSONObject
 

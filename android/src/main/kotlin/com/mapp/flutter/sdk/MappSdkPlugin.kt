@@ -12,8 +12,8 @@ import android.util.ArraySet
 import androidx.annotation.VisibleForTesting
 import com.appoxee.Appoxee
 import com.appoxee.internal.model.response.DevicePayload
-import com.appoxee.internal.model.response.inbox.InboxMessage
-import com.appoxee.internal.model.response.inbox.MessageStatus
+import com.appoxee.shared.InboxMessage
+import com.appoxee.shared.MessageStatus
 import com.appoxee.internal.network.Call
 import com.appoxee.shared.AppoxeeOptions
 import com.appoxee.shared.MappCallback
