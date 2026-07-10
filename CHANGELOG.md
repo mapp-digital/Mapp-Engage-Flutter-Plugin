@@ -1,6 +1,6 @@
 ## 0.1.1
 - Android updates:
-  - Updated Mapp Engage android SDK to version 7.1.0
+  - Updated Mapp Engage android SDK to version 7.1.1
   - Removed `kotlin-android` plugin from `build.gradle`
   - Updated Gradle wrapper to version 9.4.1
   - Updated Android Gradle Plugin to version 9.2.1
