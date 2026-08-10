@@ -5,6 +5,8 @@
   - Updated Firebase BOM to version 34.17.0
   - Updated Gradle wrapper to version 9.5.0
   - Updated Android Gradle Plugin to version 9.3.1
+- iOS updates:
+  - Removed redundant direct linking of `AppoxeeSDK.xcframework`, which is already included in `AppoxeeInapp.xcframework`
 - Sample app updates:
   - Updated the widget test to mock the native method channel for deterministic Dart VM execution
 
