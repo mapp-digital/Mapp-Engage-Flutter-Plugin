@@ -1,3 +1,13 @@
+## 0.1.2
+- Android updates:
+  - Updated Mapp Engage Android SDK to version 7.1.2
+  - Updated Kotlin coroutines to version 1.11.0
+  - Updated Firebase BOM to version 34.17.0
+  - Updated Gradle wrapper to version 9.5.0
+  - Updated Android Gradle Plugin to version 9.3.1
+- Sample app updates:
+  - Updated the widget test to mock the native method channel for deterministic Dart VM execution
+
 ## 0.1.1
 - Android updates:
   - Updated Mapp Engage android SDK to version 7.1.1
