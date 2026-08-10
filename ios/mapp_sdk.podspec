@@ -17,7 +17,6 @@ A new flutter plugin project.
   s.public_header_files = 'Classes/**/*.h'
   s.dependency 'Flutter'
   s.vendored_frameworks = [
-    'Frameworks/AppoxeeSDK.xcframework',
     'Frameworks/AppoxeeLocationServices.xcframework',
     'Frameworks/AppoxeeInapp.xcframework'
   ]
