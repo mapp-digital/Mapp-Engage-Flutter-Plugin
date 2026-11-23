@@ -74,6 +74,24 @@ By default, the plugin handles Mapp push notifications automatically via its bui
 - Mapp messages are received, parsed, and displayed by the native Mapp SDK
 - Your Flutter app receives callbacks via `MappSdk.handledRemoteNotification`, `MappSdk.handledPushOpen`, etc.
 
+### Android notification channels (0.1.3)
+
+Version `0.1.3` uses Mapp Engage Android SDK `7.1.4`. On Android 8.0 (API 26) and later, the native SDK selects the notification channel in this order:
+
+| Channels already present | Channel used |
+| --- | --- |
+| `${packageName}_CHANNEL_ID` (with or without the legacy channel) | Existing `${packageName}_CHANNEL_ID` |
+| Only legacy `channel_id_001` | Existing `channel_id_001`; no package-based channel is created |
+| Neither | New `${packageName}_CHANNEL_ID` at `HIGH` importance |
+
+Existing channels are preserved without renaming, deletion, replacement, or reconfiguration. This keeps their importance, blocked state, sound, vibration, badges, and other user settings. If both channels exist, the package-based channel takes precedence even when its importance is `DEFAULT`, `LOW`, or blocked and the legacy channel is `HIGH`.
+
+**Existing `DEFAULT` channels are not automatically promoted.** Users can enable banners through the app's Android notification settings. `HIGH` importance supports heads-up notifications, but notification permission, Do Not Disturb, and device settings still apply. This update does not restore v6 sound-specific routing.
+
+The same policy applies to Mapp notifications received through the default `MappFlutterMessagingService`, a custom service delegating to `MappMessageHandler`, or `MappSdk.handleRemoteMessage()`. Keep channel selection in the native SDK; no dashboard channel-ID changes are needed. Other providers' channels remain under their own control. Android versions below API 26 retain the existing behavior without notification channels.
+
+To verify a v6 upgrade, install a v6-based APK and upgrade it in place with the same application ID and signing certificate, preserving app data. Uninstalling and reinstalling does not test preservation of an existing channel. Check the selected channel and its settings after notifications and app restarts in both example integrations.
+
 ### Using with firebase_messaging Plugin
 
 If you need to handle push messages from multiple providers (e.g., using the `firebase_messaging` plugin alongside Mapp), see **[INTEGRATION_FIREBASE_MESSAGING.md](INTEGRATION_FIREBASE_MESSAGING.md)** for detailed integration instructions.

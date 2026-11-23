@@ -1,3 +1,11 @@
+## 0.1.3
+- Updated Mapp Engage Android SDK to version 7.1.4.
+- Android 8+ notification channels now follow the native SDK preservation policy:
+  - Reuse an existing `${packageName}_CHANNEL_ID`, otherwise reuse legacy `channel_id_001`.
+  - Create `${packageName}_CHANNEL_ID` at `HIGH` importance only when neither channel exists.
+  - Preserve existing channel settings, including importance and blocked state. Existing `DEFAULT` channels are not automatically promoted; users can enable banners in Android notification settings.
+- See the [Android notification-channel migration guidance](README.md#android-notification-channels-013) for upgrade behavior and heads-up notification limitations.
+
 ## 0.1.2
 - Android updates:
   - Updated Mapp Engage Android SDK to version 7.1.2
