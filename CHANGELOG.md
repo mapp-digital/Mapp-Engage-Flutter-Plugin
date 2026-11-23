@@ -1,5 +1,6 @@
 ## 0.1.3
 - Updated Mapp Engage Android SDK to version 7.1.4.
+- Updated the Kotlin Gradle plugin from `2.3.10` to `2.3.20` in both Android examples to resolve Flutter's Kotlin minimum-version warning.
 - Android 8+ notification channels now follow the native SDK preservation policy:
   - Reuse an existing `${packageName}_CHANNEL_ID`, otherwise reuse legacy `channel_id_001`.
   - Create `${packageName}_CHANNEL_ID` at `HIGH` importance only when neither channel exists.

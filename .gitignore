@@ -40,3 +40,4 @@ doc/api/
 /android/property**
 example/android/app/property*
 .settings/
+*/.DS_Store
