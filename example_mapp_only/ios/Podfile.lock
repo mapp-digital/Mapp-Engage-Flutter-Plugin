@@ -1,28 +1,22 @@
 PODS:
   - Flutter (1.0.0)
-  - integration_test (0.0.1):
-    - Flutter
   - mapp_sdk (0.0.12):
     - Flutter
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
-  - integration_test (from `.symlinks/plugins/integration_test/ios`)
   - mapp_sdk (from `.symlinks/plugins/mapp_sdk/ios`)
 
 EXTERNAL SOURCES:
   Flutter:
     :path: Flutter
-  integration_test:
-    :path: ".symlinks/plugins/integration_test/ios"
   mapp_sdk:
     :path: ".symlinks/plugins/mapp_sdk/ios"
 
 SPEC CHECKSUMS:
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
-  integration_test: 252f60fa39af5e17c3aa9899d35d908a0721b573
-  mapp_sdk: d7f468c63faed5d1aca6b6d22d8178cf312edaa0
+  mapp_sdk: 7cfdf8b60cbc9f7cdc8399673e4cb42bc9b70fb1
 
-PODFILE CHECKSUM: 53026eaf67b63baa2e316e457f9701dbdf33f41a
+PODFILE CHECKSUM: aca3a3bf8387500f149c7017a2206b0c898cffee
 
 COCOAPODS: 1.16.2

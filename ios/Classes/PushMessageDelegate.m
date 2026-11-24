@@ -3,6 +3,7 @@
 
 #import "PushMessageDelegate.h"
 #import <UIKit/UIKit.h>
+#import <UserNotifications/UserNotifications.h>
 #import "AppoxeeSDK.h"
 
 @interface PushMessageDelegate() <AppoxeeDelegate, AppoxeeNotificationDelegate, UIApplicationDelegate, UNUserNotificationCenterDelegate>

@@ -1,3 +1,8 @@
+## Unreleased
+- Raised the minimum supported iOS version to 16.0 to match the bundled AppoxeeInapp framework. Aligned the example app, notification extension, and CocoaPods deployment targets.
+- Added an explicit UserNotifications import and framework dependency to fix notification delegate compilation with current Xcode versions.
+- Migrated the iOS example to the UIScene lifecycle to fix startup with Xcode 27 and iOS 27. The example now requires Flutter 3.38 or later.
+
 ## 0.1.3
 - Updated Mapp Engage Android SDK to version 7.1.4.
 - Updated the Kotlin Gradle plugin from `2.3.10` to `2.3.20` in both Android examples to resolve Flutter's Kotlin minimum-version warning.

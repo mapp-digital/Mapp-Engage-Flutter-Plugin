@@ -7,6 +7,8 @@ https://docs.mapp.com/docs/flutter
 
 ## Getting Started
 
+iOS apps require **iOS 16.0 or later**, matching the bundled AppoxeeInapp framework. Set the app and notification extension deployment targets to at least 16.0 and use `platform :ios, '16.0'` in your Podfile.
+
 ### 1. Add the dependency
 
 Add `mapp_sdk` to your `pubspec.yaml`:

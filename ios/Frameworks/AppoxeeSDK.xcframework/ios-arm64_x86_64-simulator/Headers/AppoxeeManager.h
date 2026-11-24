@@ -106,7 +106,7 @@
  @param completionHandler The completionHandler argument passed by the application delegate.
  @return YES, if Appoxee handled the action, else returns NO. If the returned value is NO, you will need to call completionHandler(); after you finish handling the Push action.
  */
-- (BOOL)handleActionWithIdentifier:(nullable NSString *)identifier forRemoteNotification:(nonnull NSDictionary *)userInfo completionHandler:(void (^ _Nullable)())completionHandler DEPRECATED_MSG_ATTRIBUTE("use handleActionWithIdentifier:forRemoteNotification:completionHandler: instead.");
+- (BOOL)handleActionWithIdentifier:(nullable NSString *)identifier forRemoteNotification:(nonnull NSDictionary *)userInfo completionHandler:(void (^ _Nullable)(void))completionHandler DEPRECATED_MSG_ATTRIBUTE("use handleActionWithIdentifier:forRemoteNotification:completionHandler: instead.");
 
 #pragma mark - Device API Legacy
 

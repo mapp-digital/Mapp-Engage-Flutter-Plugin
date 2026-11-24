@@ -16,7 +16,8 @@ typedef NS_ENUM(NSInteger, INAPPSERVER) {
     cROC,
     tEST,
     tEST55,
-    tEST61
+    tEST61,
+    tEST3
 };
 
 @class AppoxeeInapp;
@@ -97,6 +98,18 @@ typedef NS_ENUM(NSInteger, INAPPSERVER) {
  */
 + (nonnull NSString *)inappVersion;
 
+/**
+ Configures the bundle used to load Appoxee In-App resources.
+ @param resourceBundle The bundle containing resources such as customFont.css.
+ */
++ (void)configureWithResourceBundle:(nullable NSBundle *)resourceBundle;
+
+/**
+ Returns the configured resource bundle, or AppoxeeInappResources.bundle from
+ the main bundle when no bundle was explicitly configured.
+ */
++ (nullable NSBundle *)resourceBundle;
+
 - (enum INAPPSERVER)getServer;
 
 /**
@@ -148,7 +161,7 @@ typedef NS_ENUM(NSInteger, INAPPSERVER) {
 
 - (void)fetchInBoxMessageWithMessageId:(NSString *_Nullable)messageId;
 
-- (void)fireInAppEventWithAppId:(NSString *_Nullable)appId tenantId:(NSString *_Nullable)tenantId userId:(NSString *_Nullable)userId deviceId:(NSString *_Nullable)deviceId jamieUrl:(NSString *_Nullable)jamieUrl alias:(NSString *)alias andEventName:(NSString *_Nullable)eventName;
+- (void)fireInAppEventWithAppId:(NSString *_Nullable)appId tenantId:(NSString *_Nullable)tenantId userId:(NSString *_Nullable)userId deviceId:(NSString *_Nullable)deviceId jamieUrl:(NSString *_Nullable)jamieUrl alias:(NSString *_Nullable)alias andEventName:(NSString *_Nullable)eventName;
 
 
 @end

@@ -11,7 +11,6 @@
 #import "APXPushNotification.h"
 #import "APXRichMessage.h"
 #import "APXClientDevice.h"
-#import <UserNotifications/UserNotifications.h>
 
 typedef NS_ENUM(NSInteger, SERVER) {
     L3,
@@ -26,6 +25,7 @@ typedef NS_ENUM(NSInteger, SERVER) {
 @class Appoxee;
 @class UNUserNotificationCenter;
 @class UNNotificationResponse;
+@class UNNotificationCategory;
 
 typedef void(^AppoxeeCompletionHandler)(NSError * _Nullable appoxeeError, id _Nullable data);
 
@@ -135,12 +135,11 @@ typedef void(^AppoxeeCompletionHandler)(NSError * _Nullable appoxeeError, id _Nu
  */
 @property (nonatomic) BOOL isDefaultBehaviorOfNotificationRegistration;
 
-+(SERVER) getServer;
+-(SERVER) getServer;
 
+-(nullable NSString *) getRequest;
 
-+(nullable NSString *) getRequest;
-
-+(nullable NSString *) getAliasRequest;
+-(nullable NSString *) getAliasRequest;
 /**
  Method auto integrate and engage with Appoxee SDK.
  @brief Call this method to perform auto integration of your AppDelegate file, and to engage with Appoxee SDK.
@@ -241,7 +240,7 @@ typedef void(^AppoxeeCompletionHandler)(NSError * _Nullable appoxeeError, id _Nu
  </code></pre>
  @param notificationSettings UIUserNotificationSettings instance.
  */
-- (void)didRegisterUserNotificationSettings:(nullable NSObject *)notificationSettings;
+- (void)didRegisterUserNotificationSettings:(nullable NSObject *)notificationSettings API_DEPRECATED("Use UserNotifications Framework's -[UNUserNotificationCenter requestAuthorizationWithOptions:completionHandler:]", ios(8.0, 10.0));
 
 #pragma mark - Push Handling iOS9
 
@@ -274,7 +273,7 @@ typedef void(^AppoxeeCompletionHandler)(NSError * _Nullable appoxeeError, id _Nu
  @param completionHandler The completionHandler argument passed by the application delegate.
  @return YES, if Appoxee handled the action, else returns NO. If the returned value is NO, you will need to call completionHandler(); after you finish handling the Push action.
  */
-- (BOOL)handleActionWithIdentifier:(nullable NSString *)identifier forRemoteNotification:(nullable NSDictionary *)userInfo completionHandler:(nonnull void (^)())completionHandler;
+- (BOOL)handleActionWithIdentifier:(nullable NSString *)identifier forRemoteNotification:(nullable NSDictionary *)userInfo completionHandler:(nonnull void (^)(void))completionHandler API_DEPRECATED("Use UserNotifications Framework's -[UNUserNotificationCenterDelegate didReceiveNotificationResponse:withCompletionHandler:]", ios(8.0, 10.0));
 
 /*
  
@@ -470,6 +469,15 @@ typedef void(^AppoxeeCompletionHandler)(NSError * _Nullable appoxeeError, id _Nu
  */
 - (void)isInboxEnabled:(nullable AppoxeeCompletionHandler)handler;
 
+/**
+ Logout the current aliased user and control the device push opt-in state after logout.
+ @brief Method logs out the current aliased user. If the current device alias is auto-generated and contains "AUTO_", the SDK keeps the device registration and updates push opt-in state by calling disablePushNotifications: with the inverse of status. If the current device alias is a customer alias, the SDK removes the registered device and re-engages using the APXOptIn launch option.
+ <pre><code>
+ [[Appoxee shared] logoutWithOptin:NO];
+ </code></pre>
+ @param status BOOL value indicating the desired push opt-in state after logout. Pass YES to keep or restore push opt-in. Pass NO to opt the device out from push after logout.
+ @attention This method first fetches the current device alias. If the alias request fails or does not return an NSString alias, no logout action is performed.
+ */
 -(void)logoutWithOptin: (BOOL)status;
 
 #pragma mark - Alias
@@ -523,7 +531,7 @@ typedef void(^AppoxeeCompletionHandler)(NSError * _Nullable appoxeeError, id _Nu
  An NSString object representing an alias.
  @param handler Code Block to be executed when method completes with an NSError object and data as arguments.
  */
-- (void)removeDeviceAliasWithCompletionHandler:(nullable AppoxeeCompletionHandler)handler;
+- (void)removeDeviceAliasWithCompletionHandler:(nullable AppoxeeCompletionHandler)handler API_DEPRECATED("removeDeviceAliasWithCompletionHandler() is deprecated and will be removed in version 3.0.0. Use logout() instead.", ios(6.0, 8.0));
 
 /**
  Get an alias for a device.

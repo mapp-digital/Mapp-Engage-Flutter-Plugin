@@ -8,7 +8,8 @@
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
-#import <CoreLocation/CoreLocation.h>
+
+@class CLLocationManager;
 
 typedef NS_ENUM(NSInteger, APXInterfaceServiceOperation) {
     kAPXInterfaceServiceOperationOne = 1,

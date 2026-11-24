@@ -26,9 +26,9 @@ A new flutter plugin project.
     'Frameworks/AppoxeeInappResources.bundle'
   ]
   s.requires_arc = true
-  s.frameworks = "WebKit"
+  s.frameworks = ['WebKit', 'UserNotifications']
   s.library = 'sqlite3'
-  s.platform = :ios, '10.0'
+  s.platform = :ios, '16.0'
   s.static_framework = true
   s.swift_version = '5.0'
 

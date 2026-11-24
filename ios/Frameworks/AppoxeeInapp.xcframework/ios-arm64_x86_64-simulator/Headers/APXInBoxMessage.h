@@ -70,7 +70,7 @@
 /*!
  Return whole dictionary to addopt cordova plugin
  */
-- (NSDictionary *)getDictionary;
+- (NSDictionary *_Nonnull)getDictionary;
 
 /*!
  * Handles all actions based on the request received

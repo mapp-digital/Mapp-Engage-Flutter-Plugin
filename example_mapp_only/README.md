@@ -25,6 +25,10 @@ Use this example when:
 
 ## Setup
 
+Use Flutter 3.38 or later. On iOS, this example requires iOS 16.0 or later, including for the simulator. The app, notification extension, and CocoaPods targets use this minimum to match the bundled AppoxeeInapp framework.
+
+The iOS example uses Flutter's UIScene lifecycle and registers plugins when the implicit engine initializes, so it can launch when built with Xcode 27. See the [Flutter UIScene migration guide](https://docs.flutter.dev/release/breaking-changes/uiscenedelegate) for details.
+
 1. Update `lib/engage_config.dart` with your Mapp SDK credentials
 2. Add your `google-services.json` to `android/app/`
 3. Run: `flutter run`
