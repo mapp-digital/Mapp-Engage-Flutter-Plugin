@@ -3,7 +3,30 @@
 # Files and directories created by pub
 .dart_tool/
 .packages
+.flutter-plugins
+.flutter-plugins-dependencies
 build/
+
+# macOS and local IDE metadata
+.DS_Store
+.idea/
+*.iml
+.classpath
+.project
+
+# Machine-specific Android configuration and generated plugin registration
+**/android/local.properties
+**/android/**/GeneratedPluginRegistrant.java
+
+# CocoaPods and Flutter-generated iOS files (keep vendored SDKs and lockfiles)
+**/ios/Pods/
+**/ios/.symlinks/
+**/ios/**/xcuserdata/
+**/ios/Flutter/Flutter.podspec
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/ephemeral/
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/Runner/GeneratedPluginRegistrant.*
 
 # Android Gradle cache and build outputs
 .gradle/
@@ -40,4 +63,3 @@ doc/api/
 /android/property**
 example/android/app/property*
 .settings/
-*/.DS_Store
